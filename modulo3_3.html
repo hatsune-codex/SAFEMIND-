@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nivel 3: El Dilema del Wi-Fi Público</title>
+    <style>
+        /* === VARIABLES & RESET === */
+        :root {
+            --bg-color: #0b1121;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --phone-bg: #0f172a;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(34, 197, 94, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* === LAYOUT PRINCIPAL === */
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header-title h1 {
+            color: var(--accent-blue);
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* === PANEL IZQUIERDO: REDES WI-FI === */
+        .panel-left {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+        }
+
+        .wifi-card {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wifi-card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .wifi-card.active {
+            border-color: var(--accent-blue);
+            background: rgba(56, 189, 248, 0.1);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .wifi-card.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent-blue);
+            box-shadow: 0 0 10px var(--accent-blue);
+        }
+
+        .wifi-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wifi-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .wifi-status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .wifi-icon {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* === PANEL DERECHO: TELÉFONO === */
+        .panel-right {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .phone-mockup {
+            width: 300px;
+            height: 520px;
+            background: var(--phone-bg);
+            border: 12px solid #1e293b;
+            border-radius: 40px;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Notch */
+        .phone-mockup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 25px;
+            background: #1e293b;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+
+        .phone-header {
+            background: #0f172a;
+            padding: 35px 20px 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .phone-body {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Toggle Switch VPN */
+        .control-group {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px; width: 20px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* App Bancaria Button */
+        .bank-app {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .bank-app:hover { background: rgba(239, 68, 68, 0.2); }
+        .bank-app.opened {
+            background: var(--accent-red);
+            color: white;
+            box-shadow: 0 0 15px var(--accent-red);
+        }
+        .bank-app-icon { font-size: 2rem; margin-bottom: 5px; }
+
+        /* Botón Principal Comprobar */
+        .btn-check {
+            margin-top: auto;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+            transition: transform 0.1s, box-shadow 0.3s;
+        }
+        .btn-check:active { transform: scale(0.96); }
+        .btn-check:hover { box-shadow: 0 6px 20px rgba(56, 189, 248, 0.6); }
+
+        /* === MODAL (VICTORIA / DERROTA) === */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--phone-bg);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+
+        .modal-icon { font-size: 3.5rem; margin-bottom: 15px; }
+        .modal-title { font-size: 1.8rem; margin-bottom: 15px; }
+        .modal-text { color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; font-size: 1rem; }
+        .modal-list { text-align: left; margin-bottom: 20px; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;}
+        .modal-list li { margin-bottom: 8px; margin-left: 20px; }
+
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--accent-green);
+            color: #000;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+        }
+        .btn-primary:hover { box-shadow: 0 0 25px rgba(34, 197, 94, 0.7); }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+        }
+        .btn-secondary:hover { background: rgba(56, 189, 248, 0.1); }
+
+        .btn-retry {
+            background: var(--accent-red);
+            color: white;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .game-container { grid-template-columns: 1fr; }
+            .phone-mockup { width: 100%; max-width: 350px; }
+        }
+    </style>
+</head>
+<body>
+    <a href="Modulo_3.html" style="position:fixed;top:16px;left:16px;z-index:1000;padding:10px 14px;border:1px solid var(--accent-blue);background:rgba(11,17,33,.92);color:var(--accent-blue);font-weight:700;text-decoration:none;">&larr; REGRESAR</a>
+
+    <div class="game-container">
+        <div class="header-title">
+            <h1>Nivel 3: El Dilema del Wi-Fi Público</h1>
+            <p>Estás en una cafetería. Configura tu dispositivo para una navegación segura.</p>
+        </div>
+
+        <!-- Panel Izquierdo: Redes -->
+        <div class="panel-left">
+            <div class="panel-title">📡 Redes Disponibles</div>
+
+            <div class="wifi-card" onclick="selectNetwork('red1')">
+                <div class="wifi-info">
+                    <span class="wifi-name">Wi-Fi Cafetería Gratis</span>
+                    <span class="wifi-status">Red Abierta (Sin Encriptar)</span>
+                </div>
+                <div class="wifi-icon">🔓</div>
+            </div>
+
+            <div class="wifi-card" onclick="selectNetwork('red2')">
+                <div class="wifi-info">
+                    <span class="wifi-name" style="color: var(--accent-blue);">Cafetería_Oficial_5G</span>
+                    <span class="wifi-status">Protegida (WPA3) - Clave en caja</span>
+                </div>
+                <div class="wifi-icon">🔒</div>
+            </div>
+
+            <div class="wifi-card" onclick="selectNetwork('red3')">
+                <div class="wifi-info">
+                    <span class="wifi-name">Wi-Fi_Gratis_Sin_Password</span>
+                    <span class="wifi-status">Red Abierta (Potencial Evil Twin)</span>
+                </div>
+                <div class="wifi-icon">🔓</div>
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Teléfono -->
+        <div class="panel-right">
+            <div class="phone-mockup">
+                <div class="phone-header">
+                    <h3 style="color: white; font-size: 1.1rem;">Centro de Control</h3>
+                    <p id="phone-status" style="color: var(--accent-red); font-size: 0.8rem; margin-top: 5px;">Desconectado</p>
+                </div>
+                
+                <div class="phone-body">
+                    <!-- Toggle VPN -->
+                    <div class="control-group">
+                        <div>
+                            <strong style="color: white; display: block;">Escudo VPN</strong>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Cifra tu tráfico de red</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="vpn-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Botón App Bancaria -->
+                    <div class="bank-app" id="bank-app" onclick="toggleBankApp()">
+                        <div class="bank-app-icon">🏦</div>
+                        <strong id="bank-app-text">Abrir App Bancaria</strong>
+                        <div style="font-size: 0.8rem; margin-top: 5px; color: var(--text-muted);">Acceso a finanzas</div>
+                    </div>
+
+                    <!-- Botón de Comprobación -->
+                    <button class="btn-check" onclick="checkSecurity()">Comprobar Conexión Segura</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultados -->
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <div id="modal-icon" class="modal-icon">🛡️</div>
+            <h2 id="modal-title" class="modal-title">Título</h2>
+            <p id="modal-text" class="modal-text">Mensaje</p>
+            
+            <ul id="modal-list" class="modal-list" style="display: none;"></ul>
+
+            <div id="modal-buttons" class="modal-buttons">
+                <!-- Los botones se inyectan dinámicamente desde JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado del Juego
+        let gameState = {
+            selectedNetwork: null,
+            isVpnOn: false,
+            isBankAppOpen: false
+        };
+
+        // Seleccionar Red Wi-Fi
+        function selectNetwork(networkId) {
+            // Remover clase activa de todos
+            document.querySelectorAll('.wifi-card').forEach(card => card.classList.remove('active'));
+            
+            // Añadir clase activa al seleccionado
+            const selectedCard = event.currentTarget;
+            selectedCard.classList.add('active');
+
+            // Actualizar estado
+            gameState.selectedNetwork = networkId;
+
+            // Actualizar status del teléfono
+            const statusText = document.getElementById('phone-status');
+            statusText.style.color = 'var(--accent-blue)';
+            
+            if(networkId === 'red1') statusText.innerText = "Conectado a: Wi-Fi Cafetería Gratis";
+            if(networkId === 'red2') statusText.innerText = "Conectado a: Cafetería_Oficial_5G";
+            if(networkId === 'red3') statusText.innerText = "Conectado a: Wi-Fi_Gratis_Sin_Password";
+        }
+
+        // Toggle App Bancaria
+        function toggleBankApp() {
+            const bankAppBtn = document.getElementById('bank-app');
+            const bankAppText = document.getElementById('bank-app-text');
+            
+            gameState.isBankAppOpen = !gameState.isBankAppOpen;
+
+            if(gameState.isBankAppOpen) {
+                bankAppBtn.classList.add('opened');
+                bankAppText.innerText = "App Bancaria Abierta";
+            } else {
+                bankAppBtn.classList.remove('opened');
+                bankAppText.innerText = "Abrir App Bancaria";
+            }
+        }
+
+        // Sincronizar VPN
+        document.getElementById('vpn-toggle').addEventListener('change', function(e) {
+            gameState.isVpnOn = e.target.checked;
+        });
+
+        // Comprobar Condiciones de Seguridad
+        function checkSecurity() {
+            if (!gameState.selectedNetwork) {
+                showModal('warning', '⚠️ Conexión Requerida', 'Debes seleccionar una red Wi-Fi del panel izquierdo antes de comprobar la seguridad.');
+                return;
+            }
+
+            let errors = [];
+
+            // Regla 1: Red Oficial WPA3
+            if (gameState.selectedNetwork !== 'red2') {
+                errors.push("❌ <b>Red Insegura:</b> Te conectaste a una red abierta. Estás vulnerable a ataques <i>Man-in-the-Middle</i> (MitM).");
+            }
+
+            // Regla 2: VPN Activada
+            if (!gameState.isVpnOn) {
+                errors.push("❌ <b>VPN Apagada:</b> Tu tráfico no está encriptado. Cualquiera en la red podría interceptar tus datos.");
+            }
+
+            // Regla 3: No usar App Bancaria
+            if (gameState.isBankAppOpen) {
+                errors.push("❌ <b>Uso Riesgoso:</b> Nunca debes abrir apps financieras en redes Wi-Fi públicas, incluso con VPN, debido al alto riesgo.");
+            }
+
+            // Evaluar Resultado
+            if (errors.length === 0) {
+                SafeMindProgress.complete(3, 3);
+                // VICTORIA
+                showModal('success', '¡Conexión Blindada! 🛡️', 
+                    'Has tomado decisiones excelentes. Te conectaste a la red oficial (WPA3), activaste tu túnel VPN para encriptar tu tráfico y evitaste realizar transacciones bancarias en un entorno público.', 
+                    []);
+            } else {
+                // DERROTA
+                showModal('error', 'Brecha de Seguridad Detectada 🚨', 
+                    'Los ciberdelincuentes podrían haber robado tu información. Revisa tus errores:', 
+                    errors);
+            }
+        }
+
+        // Controlador del Modal
+        function showModal(type, title, text, listItems = []) {
+            const modal = document.getElementById('result-modal');
+            const mIcon = document.getElementById('modal-icon');
+            const mTitle = document.getElementById('modal-title');
+            const mText = document.getElementById('modal-text');
+            const mList = document.getElementById('modal-list');
+            const mBtns = document.getElementById('modal-buttons');
+
+            mTitle.innerHTML = title;
+            mText.innerHTML = text;
+
+            // Manejo de la lista de errores
+            if (listItems.length > 0) {
+                mList.style.display = 'block';
+                mList.innerHTML = listItems.map(item => `<li>${item}</li>`).join('');
+            } else {
+                mList.style.display = 'none';
+            }
+
+            // Configurar estilos y botones según el tipo
+            mTitle.style.color = type === 'success' ? 'var(--accent-green)' : type === 'error' ? 'var(--accent-red)' : 'var(--accent-blue)';
+            
+            if (type === 'success') {
+                mIcon.innerHTML = '🎉';
+                mBtns.innerHTML = `
+                    <a href="modulo3_3.html" class="btn btn-primary">Siguiente Nivel</a>
+                    <a href="modo_kids.html" class="btn btn-secondary">Regresar al Menú</a>
+                `;
+            } else if (type === 'error') {
+                mIcon.innerHTML = '💀';
+                mBtns.innerHTML = `
+                    <button class="btn btn-retry" onclick="closeModal()">Reintentar Ejercicio</button>
+                    <a href="modo_kids.html" class="btn btn-secondary">Regresar al Menú</a>
+                `;
+            } else {
+                mIcon.innerHTML = '📡';
+                mBtns.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Entendido</button>`;
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.remove('show');
+        }
+    </script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

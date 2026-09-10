@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nivel 2: Guardián de Permisos de Apps</title>
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --primary-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --success-green: #10b981;
+      --danger-red: #ef4444;
+      --warning-amber: #f59e0b;
+      --bg-dark: #030712;
+      --phone-outer: #111827;
+      --glass-surface: rgba(17, 24, 39, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background: var(--bg-dark);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: var(--text-main);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Fondo dinámico en laterales */
+    .bg-blobs {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.35;
+      animation: pulseBlob 10s infinite alternate ease-in-out;
+    }
+
+    .blob-1 {
+      width: 450px;
+      height: 450px;
+      background: var(--primary-cyan);
+      top: -100px;
+      left: -150px;
+    }
+
+    .blob-2 {
+      width: 500px;
+      height: 500px;
+      background: var(--accent-purple);
+      bottom: -150px;
+      right: -150px;
+      animation-delay: -5s;
+    }
+
+    .blob-3 {
+      width: 350px;
+      height: 350px;
+      background: var(--primary-blue);
+      top: 40%;
+      left: 70%;
+      animation-delay: -2s;
+    }
+
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    @keyframes pulseBlob {
+      0% { transform: scale(1) translate(0, 0); }
+      50% { transform: scale(1.15) translate(30px, -20px); }
+      100% { transform: scale(0.9) translate(-20px, 30px); }
+    }
+
+    /* Decoraciones laterales informativas */
+    .side-widget {
+      position: absolute;
+      z-index: 2;
+      background: var(--glass-surface);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .side-widget-left {
+      left: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .side-widget-right {
+      right: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .widget-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .widget-text h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .widget-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 1024px) {
+      .side-widget { display: none; }
+    }
+
+    /* Chasis del Smartphone */
+    .smartphone-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 400px;
+      height: 800px;
+      background: #000;
+      border-radius: 54px;
+      padding: 12px;
+      box-shadow: 
+        0 0 0 3px #374151,
+        0 0 0 6px #1f2937,
+        0 25px 70px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(6, 182, 212, 0.25);
+      transition: box-shadow 0.4s ease;
+    }
+
+    .screen-body {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top, #1e1b4b 0%, #090d16 60%, #030712 100%);
+      border-radius: 44px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Dynamic Island / Notch */
+    .dynamic-island-container {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 28px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .camera-lens {
+      width: 10px;
+      height: 10px;
+      background: #111827;
+      border-radius: 50%;
+      border: 1px solid #1f2937;
+    }
+
+    .sensor-dot {
+      width: 6px;
+      height: 6px;
+      background: #064e3b;
+      border-radius: 50%;
+    }
+
+    /* Barra de Estado OS */
+    .status-bar {
+      height: 48px;
+      padding: 12px 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      z-index: 40;
+    }
+
+    .status-left { font-weight: 700; letter-spacing: -0.2px; }
+    .status-right { display: flex; gap: 6px; align-items: center; font-size: 0.85rem; }
+
+    /* HUD del Juego */
+    .game-hud {
+      padding: 16px 20px 12px;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .hud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .badge-level {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--primary-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .counter-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .health-container {
+      position: relative;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .health-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #10b981, #34d399);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease;
+    }
+
+    /* Escenario Principal */
+    .viewport {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Card Emergente Nativa de iOS/Android */
+    .app-card {
+      width: 100%;
+      background: var(--glass-surface);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 24px 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      position: relative;
+      transform-origin: center;
+      animation: cardEntrance 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes cardEntrance {
+      0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .shake {
+      animation: shakeEffect 0.4s ease-in-out;
+    }
+
+    @keyframes shakeEffect {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-12px); }
+      40%, 80% { transform: translateX(12px); }
+    }
+
+    .icon-wrapper {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 14px;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .app-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .app-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 18px;
+    }
+
+    .perm-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .perm-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-cyan);
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-act {
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-act:active {
+      transform: scale(0.96);
+    }
+
+    .btn-deny {
+      background: rgba(239, 68, 68, 0.12);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-deny:hover {
+      background: var(--danger-red);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-grant {
+      background: rgba(16, 185, 129, 0.12);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-grant:hover {
+      background: var(--success-green);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Modal de Feedback Estilo Notificación Nativa */
+    .toast-feedback {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.92);
+      backdrop-filter: blur(20px);
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 28px 22px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .toast-feedback.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .toast-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin-bottom: 14px;
+      animation: scaleUp 0.3s ease;
+    }
+
+    @keyframes scaleUp {
+      0% { transform: scale(0.5); }
+      100% { transform: scale(1); }
+    }
+
+    .toast-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .toast-body {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .btn-continue {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary-cyan), var(--primary-blue));
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(6, 182, 212, 0.3);
+    }
+
+    /* Pantalla de Resumen Final */
+    .summary-view {
+      display: none;
+      width: 100%;
+      height: 100%;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      animation: cardEntrance 0.5s ease;
+    }
+
+    .summary-badge {
+      width: 90px;
+      height: 90px;
+      border-radius: 28px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      margin-bottom: 16px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .summary-heading {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .summary-detail {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.4;
+    }
+
+    .nav-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .btn-nav-link {
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-next-level {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-retry {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid var(--glass-border);
+    }
+
+    .btn-back-module {
+      background: transparent;
+      color: var(--primary-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+
+    .btn-nav-link:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <a href="Modulo_3.html" style="position:fixed;top:16px;left:16px;z-index:1000;padding:10px 14px;border:1px solid var(--primary-cyan);background:rgba(3,7,18,.92);color:var(--primary-cyan);font-weight:700;text-decoration:none;">&larr; REGRESAR</a>
+
+  <!-- Fondo Neón Dinámico -->
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+  <div class="grid-overlay"></div>
+
+  <!-- Decoración Externa Lateral Izquierda -->
+  <div class="side-widget side-widget-left">
+    <div class="widget-icon">🛡️</div>
+    <div class="widget-text">
+      <h4>Módulo 3: Privacidad Móvil</h4>
+      <p>Nivel 2 - Guardián de Permisos</p>
+    </div>
+  </div>
+
+  <!-- Decoración Externa Lateral Derecha -->
+  <div class="side-widget side-widget-right">
+    <div class="widget-icon">⚡</div>
+    <div class="widget-text">
+      <h4>Evaluación en Vivo</h4>
+      <p>Analiza el principio de mínimo privilegio</p>
+    </div>
+  </div>
+
+  <!-- Contenedor del Smartphone -->
+  <div class="smartphone-container">
+    <div class="screen-body">
+      
+      <!-- Dynamic Island -->
+      <div class="dynamic-island-container" id="dynamicIsland">
+        <div class="sensor-dot"></div>
+        <div class="camera-lens"></div>
+      </div>
+
+      <!-- Barra de Estado OS -->
+      <div class="status-bar">
+        <span class="status-left" id="liveClock">09:41</span>
+        <div class="status-right">
+          <span>📶</span>
+          <span>5G</span>
+          <span>🔋</span>
+        </div>
+      </div>
+
+      <!-- HUD del Juego -->
+      <div class="game-hud">
+        <div class="hud-header">
+          <span class="badge-level">Guardián de Permisos</span>
+          <span class="counter-text" id="appProgress">App 1 de 5</span>
+        </div>
+        <div class="health-container">
+          <div class="health-bar" id="healthBar"></div>
+        </div>
+      </div>
+
+      <!-- Pantalla Principal -->
+      <div class="viewport">
+        
+        <!-- Tarjeta Emergente de Permiso -->
+        <div class="app-card" id="appCard">
+          <div class="icon-wrapper" id="appIcon">🧮</div>
+          <h2 class="app-title" id="appName">Calculadora Rápida</h2>
+          <p class="app-sub">Esta aplicación requiere acceso a permisos del dispositivo para continuar:</p>
+          
+          <div class="perm-box" id="permBox">
+            <!-- Permisos dinámicos -->
+          </div>
+
+          <div class="actions-grid">
+            <button class="btn-act btn-deny" onclick="processChoice('deny')">Denegar</button>
+            <button class="btn-act btn-grant" onclick="processChoice('grant')">Conceder</button>
+          </div>
+        </div>
+
+        <!-- Pantalla Final de Resultados -->
+        <div class="summary-view" id="summaryView">
+          <div class="summary-badge" id="summaryBadge">🏆</div>
+          <h2 class="summary-heading" id="summaryHeading">¡Dispositivo Seguro!</h2>
+          <p class="summary-detail" id="summaryDetail">Gestionaste correctamente 5 de 5 solicitudes de permisos.</p>
+          
+          <div class="nav-stack">
+            <a href="modulo3_3.html" class="btn-nav-link btn-next-level">Siguiente Nivel</a>
+            <button class="btn-nav-link btn-retry" onclick="resetLevel()">Reintentar</button>
+            <a href="modo_kids.html" class="btn-nav-link btn-back-module">Volver al Menú</a>
+          </div>
+        </div>
+
+        <!-- Notificación emergente de Retroalimentación -->
+        <div class="toast-feedback" id="toastFeedback">
+          <div class="toast-icon" id="toastIcon">✅</div>
+          <h3 class="toast-title" id="toastTitle">¡Decisión Correcta!</h3>
+          <p class="toast-body" id="toastBody">Explicación técnica detallada...</p>
+          <button class="btn-continue" onclick="nextQuestion()">Continuar</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Base de datos de aplicaciones ficticias
+    const appSuite = [
+      {
+        id: 1,
+        title: "Calculadora Rápida",
+        icon: "🧮",
+        gradient: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+        permissions: ["📍 Ubicación en tiempo real", "🎙️ Micrófono"],
+        expected: "deny",
+        reason: "Una herramienta de cálculo realiza operaciones matemáticas en local. Exigir ubicación y micrófono es una vulneración innecesaria a tu privacidad."
+      },
+      {
+        id: 2,
+        title: "Mapa & Navegación GPS",
+        icon: "🗺️",
+        gradient: "linear-gradient(135deg, #059669, #10b981)",
+        permissions: ["📍 Ubicación GPS precisa"],
+        expected: "grant",
+        reason: "Para ofrecerte navegación giro a giro y rutas en tiempo real, el mapa necesita obligatoriamente tu ubicación GPS."
+      },
+      {
+        id: 3,
+        title: "Linterna LED Super Bright",
+        icon: "🔦",
+        gradient: "linear-gradient(135deg, #d97706, #f59e0b)",
+        permissions: ["📇 Agenda de Contactos", "🖼️ Galería de Fotos"],
+        expected: "deny",
+        reason: "La linterna solo requiere encender el hardware del flash. Acceder a tus fotos y contactos es una clara conducta espía (Spyware)."
+      },
+      {
+        id: 4,
+        title: "Editor de Fotos Vintage",
+        icon: "📷",
+        gradient: "linear-gradient(135deg, #ec4899, #db2777)",
+        permissions: ["📷 Sensor de Cámara", "📁 Almacenamiento e Imágenes"],
+        expected: "grant",
+        reason: "Un editor fotográfico necesita la cámara para capturar fotos directas y almacenamiento para procesar y guardar los archivos editados."
+      },
+      {
+        id: 5,
+        title: "Quiz Tricky Trivia",
+        icon: "❓",
+        gradient: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+        permissions: ["📇 Lista de Contactos", "💬 Lectura de Mensajes SMS"],
+        expected: "deny",
+        reason: "Un juego trivia de preguntas no tiene justificación para leer tus mensajes privados ni extraer los datos de tus contactos."
+      }
+    ];
+
+    let currentStep = 0;
+    let score = 0;
+    let health = 100;
+
+    // Referencias del DOM
+    const appCard = document.getElementById('appCard');
+    const appIcon = document.getElementById('appIcon');
+    const appName = document.getElementById('appName');
+    const permBox = document.getElementById('permBox');
+    const appProgress = document.getElementById('appProgress');
+    const healthBar = document.getElementById('healthBar');
+
+    const toastFeedback = document.getElementById('toastFeedback');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastBody = document.getElementById('toastBody');
+
+    const summaryView = document.getElementById('summaryView');
+    const summaryBadge = document.getElementById('summaryBadge');
+    const summaryHeading = document.getElementById('summaryHeading');
+    const summaryDetail = document.getElementById('summaryDetail');
+
+    // Reloj digital en vivo
+    function startClock() {
+      const update = () => {
+        const d = new Date();
+        const h = String(d.getHours()).padStart(2, '0');
+        const m = String(d.getMinutes()).padStart(2, '0');
+        document.getElementById('liveClock').textContent = `${h}:${m}`;
+      };
+      update();
+      setInterval(update, 1000);
+    }
+    startClock();
+
+    // Renderizar aplicación actual
+    function renderApp(index) {
+      const item = appSuite[index];
+      appProgress.textContent = `App ${index + 1} de ${appSuite.length}`;
+
+      appIcon.textContent = item.icon;
+      appIcon.style.background = item.gradient;
+      appName.textContent = item.title;
+
+      permBox.innerHTML = '';
+      item.permissions.forEach(perm => {
+        const row = document.createElement('div');
+        row.className = 'perm-item';
+        row.textContent = perm;
+        permBox.appendChild(row);
+      });
+
+      // Animación de refresco
+      appCard.style.animation = 'none';
+      appCard.offsetHeight;
+      appCard.style.animation = 'cardEntrance 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    }
+
+    // Procesar respuesta
+    function processChoice(userChoice) {
+      const item = appSuite[currentStep];
+      const isCorrect = userChoice === item.expected;
+
+      if (isCorrect) {
+        score++;
+        showToast(true, "¡Decisión Segura!", item.reason);
+      } else {
+        health -= 20;
+        updateHealthStatus();
+        
+        appCard.classList.add('shake');
+        setTimeout(() => appCard.classList.remove('shake'), 400);
+
+        showToast(false, "¡Riesgo de Seguridad!", item.reason);
+      }
+    }
+
+    function updateHealthStatus() {
+      healthBar.style.width = `${health}%`;
+      if (health <= 40) {
+        healthBar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+        healthBar.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.6)';
+      } else if (health <= 70) {
+        healthBar.style.background = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+        healthBar.style.boxShadow = '0 0 12px rgba(245, 158, 11, 0.6)';
+      }
+    }
+
+    function showToast(success, title, bodyText) {
+      toastIcon.textContent = success ? "🛡️" : "🚨";
+      toastIcon.style.background = success ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)";
+      toastIcon.style.border = success ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid rgba(239, 68, 68, 0.4)";
+      
+      toastTitle.textContent = title;
+      toastTitle.style.color = success ? "var(--success-green)" : "var(--danger-red)";
+      
+      toastBody.textContent = bodyText;
+      toastFeedback.classList.add('active');
+    }
+
+    function nextQuestion() {
+      toastFeedback.classList.remove('active');
+      currentStep++;
+
+      if (currentStep < appSuite.length) {
+        renderApp(currentStep);
+      } else {
+        renderSummary();
+      }
+    }
+
+    function renderSummary() {
+      appCard.style.display = 'none';
+      summaryView.style.display = 'flex';
+
+      const ratio = score / appSuite.length;
+
+      if (ratio >= 0.6) {
+        SafeMindProgress.complete(3, 2);
+      }
+
+      if (ratio === 1) {
+        summaryBadge.textContent = "🏆";
+        summaryHeading.textContent = "¡Protección Absoluta!";
+        summaryHeading.style.color = "var(--success-green)";
+      } else if (ratio >= 0.6) {
+        summaryBadge.textContent = "📱";
+        summaryHeading.textContent = "¡Dispositivo Seguro!";
+        summaryHeading.style.color = "var(--primary-cyan)";
+      } else {
+        summaryBadge.textContent = "⚠️";
+        summaryHeading.textContent = "¡Vulnerabilidad Alta!";
+        summaryHeading.style.color = "var(--danger-red)";
+      }
+
+      summaryDetail.textContent = `Gestionaste adecuadamente ${score} de las ${appSuite.length} solicitudes de permisos analizadas.`;
+    }
+
+    function resetLevel() {
+      currentStep = 0;
+      score = 0;
+      health = 100;
+      healthBar.style.background = 'linear-gradient(90deg, #10b981, #34d399)';
+      healthBar.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.5)';
+      updateHealthStatus();
+
+      summaryView.style.display = 'none';
+      appCard.style.display = 'block';
+
+      renderApp(currentStep);
+    }
+
+    // Inicio inicial
+    renderApp(currentStep);
+  </script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

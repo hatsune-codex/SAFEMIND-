@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SafeMind - Inicio de Sesión</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+
+height:100vh;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:#050816;
+
+background-image:
+radial-gradient(circle at top right,#4b24d3 0%,transparent 40%),
+radial-gradient(circle at bottom left,#00d4ff20 0%,transparent 45%);
+
+overflow:hidden;
+
+}
+
+.container{
+
+width:420px;
+
+padding:40px;
+
+border-radius:25px;
+
+background:rgba(10,15,35,.85);
+
+backdrop-filter:blur(12px);
+
+border:2px solid #00d4ff55;
+
+box-shadow:
+0 0 40px rgba(0,212,255,.2);
+
+text-align:center;
+
+}
+
+.logo{
+
+font-size:45px;
+font-weight:700;
+color:white;
+
+margin-bottom:10px;
+
+}
+
+.logo span{
+
+color:#00d4ff;
+
+}
+
+.sub{
+
+color:#c8d3ff;
+margin-bottom:35px;
+letter-spacing:2px;
+font-size:14px;
+
+}
+
+input{
+
+width:100%;
+height:55px;
+
+margin-bottom:20px;
+
+border:none;
+
+border:2px solid #00d4ff;
+
+border-radius:40px;
+
+background:transparent;
+
+padding-left:20px;
+
+font-size:17px;
+
+color:white;
+
+outline:none;
+
+}
+
+input::placeholder{
+
+color:#bdbdbd;
+
+}
+
+button{
+
+width:100%;
+height:60px;
+
+border:none;
+
+border-radius:40px;
+
+background:linear-gradient(90deg,#00d4ff,#00a8ff);
+
+color:white;
+
+font-size:20px;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:.3s;
+
+box-shadow:0 0 20px #00d4ff;
+
+}
+
+button:hover{
+
+transform:translateY(-3px);
+
+box-shadow:0 0 35px cyan;
+
+}
+
+.extra{
+
+margin-top:20px;
+color:#9fa7c4;
+font-size:14px;
+
+}
+
+a{
+
+color:#00d4ff;
+text-decoration:none;
+
+}
+
+a:hover{
+
+text-decoration:underline;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+Safe<span>Mind</span>
+</div>
+
+<div class="sub">
+CIBERSEGURIDAD EDUCATIVA
+</div>
+
+<form id="login">
+
+<input id="email" type="email" placeholder="Correo electrónico" required>
+
+<input id="password" type="password" placeholder="Contraseña" minlength="6" required>
+
+<button type="submit">
+
+Iniciar Sesión
+
+</button>
+
+</form>
+
+<button type="button" id="registerBtn" style="margin-top:12px;background:transparent;border:2px solid #00d4ff;box-shadow:none;">Crear cuenta</button>
+
+<button type="button" id="guestBtn" style="margin-top:12px;background:linear-gradient(90deg,#7b2cff,#4b24d3);box-shadow:0 0 18px #7b2cff55;">Entrar como invitado</button>
+
+<p id="authStatus" style="min-height:22px;margin-top:16px;color:#c8d3ff;font-size:13px;"></p>
+
+<div class="extra">
+¿Olvidaste tu contraseña?
+<a href="#" id="recoverBtn">Recuperar</a>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+const form = document.getElementById("login");
+const registerBtn = document.getElementById("registerBtn");
+const guestBtn = document.getElementById("guestBtn");
+const recoverBtn = document.getElementById("recoverBtn");
+const statusEl = document.getElementById("authStatus");
+
+function status(msg, ok=false){
+  statusEl.textContent = msg;
+  statusEl.style.color = ok ? "#00ff99" : "#ffbd45";
+}
+
+async function logAccess(user, tipo){
+  if (!window.supabaseClient || !user) return;
+  const { error } = await window.supabaseClient.from("registros_acceso").insert({
+    usuario_id: user.id,
+    correo: user.email || "Invitado",
+    tipo,
+    fecha: new Date().toISOString()
+  });
+  if (error) console.warn("Registro de acceso no guardado:", error.message);
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!window.SAFEMIND_SUPABASE_CONFIGURED) {
+    status("Primero configura supabase-config.js con tu URL y anon key.");
+    return;
+  }
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  status("Iniciando sesión...");
+  const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) return status("Error: " + error.message);
+  await logAccess(data.user, "inicio_sesion");
+  status("Sesión iniciada.", true);
+  window.location.href = "index.html";
+});
+
+registerBtn.addEventListener("click", async () => {
+  if (!window.SAFEMIND_SUPABASE_CONFIGURED) {
+    status("Primero configura supabase-config.js con tu URL y anon key.");
+    return;
+  }
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if (!email || password.length < 6) return status("Escribe un correo y una contraseña de al menos 6 caracteres.");
+  status("Creando cuenta...");
+  const { data, error } = await window.supabaseClient.auth.signUp({ email, password });
+  if (error) return status("Error: " + error.message);
+  if (data.user) await logAccess(data.user, "registro");
+  if (data.session) {
+    status("Cuenta creada.", true);
+    window.location.href = "index.html";
+  } else {
+    status("Cuenta creada. Revisa tu correo si Supabase solicita confirmación.", true);
+  }
+});
+
+guestBtn.addEventListener("click", async () => {
+  if (!window.SAFEMIND_SUPABASE_CONFIGURED) {
+    status("Primero configura supabase-config.js.");
+    return;
+  }
+
+  status("Entrando como invitado...");
+  guestBtn.disabled = true;
+
+  const { data, error } = await window.supabaseClient.auth.signInAnonymously();
+
+  if (error) {
+    guestBtn.disabled = false;
+    return status("Error al entrar como invitado: " + error.message);
+  }
+
+  await logAccess(data.user, "inicio_sesion");
+  status("Modo invitado iniciado.", true);
+  window.location.href = "index.html";
+});
+
+recoverBtn.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  if (!window.SAFEMIND_SUPABASE_CONFIGURED) {
+    status("Primero configura supabase-config.js.");
+    return;
+  }
+
+  const email = document.getElementById("email").value.trim();
+
+  if (!email) {
+    status("Escribe primero tu correo para enviarte el enlace de recuperación.");
+    document.getElementById("email").focus();
+    return;
+  }
+
+  status("Enviando enlace para recuperar contraseña...");
+
+  // Esta URL funciona tanto en GitHub Pages como en pruebas locales.
+  const redirectTo = new URL("reset-password.html", window.location.href).href;
+
+  const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo
+  });
+
+  if (error) {
+    return status("Error: " + error.message);
+  }
+
+  status("Te enviamos un correo. Abre el enlace para crear una nueva contraseña.", true);
+});
+
+(async()=>{
+  if (!window.SAFEMIND_SUPABASE_CONFIGURED) return;
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (session) window.location.href = "index.html";
+})();
+</script>
+
+<script src="click-spark.js"></script>
+</body>
+</html>

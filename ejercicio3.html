@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMind - Aventura Interactiva</title>
+    <link rel="stylesheet" href="ejercicio3.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <header class="navbar">
+        <div class="logo-container">
+            <img src="logo.png" alt="SafeMind Logo" class="logo-img">
+            <div class="logo-text">
+                <h1>Safe<span>Mind</span></h1>
+                <p>CIBERSEGURIDAD EDUCATIVA</p>
+            </div>
+        </div>
+        
+    </header>
+
+    <div class="separator"></div>
+
+    <div class="container">
+        <a href="Modulo_1.html" class="back-link">← Volver al módulo</a>
+
+        <!-- Contenedor de la Historia -->
+        <main class="story-wrapper">
+            <div class="phone-screen">
+                <div class="chat-header">
+                    <span class="avatar">👦🏽</span>
+                    <div class="contact-info">
+                        <h3>Alex (Compañero de clase)</h3>
+                        <p>En línea</p>
+                    </div>
+                </div>
+
+                <div class="chat-body" id="chat-body">
+                    <!-- Mensaje inicial -->
+                    <div class="message incoming">
+                        <p>Hola soy Alex de tu clase, olvidé mi contraseña de Roblox, ¿me la pasas? 🥺</p>
+                    </div>
+                </div>
+
+                <!-- Opciones de decisión -->
+                <div class="decision-panel" id="decision-panel">
+                    <p class="panel-title">¿Qué haces?</p>
+                    <button class="neon-btn choice-btn" data-choice="A">A) Se la doy, es mi amigo</button>
+                    <button class="neon-btn choice-btn" data-choice="B">B) Le digo que no puedo</button>
+                    <button class="neon-btn choice-btn" data-choice="C">C) Le pregunto a un adulto</button>
+                </div>
+
+                <!-- Panel de Consecuencia (Oculto al inicio) -->
+                <div class="outcome-panel hidden" id="outcome-panel">
+                    <div class="outcome-icon" id="outcome-icon">🎭</div>
+                    <h2 id="outcome-title">Título</h2>
+                    <p id="outcome-text">Texto de consecuencia...</p>
+                    <button class="neon-btn reset-btn" id="reset-btn">VOLVER A JUGAR</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="ejercicio3.js"></script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

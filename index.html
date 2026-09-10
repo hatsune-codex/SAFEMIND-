@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SafeMind</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<img src="logo.png">
+
+<div>
+
+<h1 class="fold-text" aria-label="SafeMind">
+<span class="fold-text-piece">S</span><span class="fold-text-piece">a</span><span class="fold-text-piece">f</span><span class="fold-text-piece">e</span><span class="fold-text-piece fold-text-accent">M</span><span class="fold-text-piece fold-text-accent">i</span><span class="fold-text-piece fold-text-accent">n</span><span class="fold-text-piece fold-text-accent">d</span>
+</h1>
+<p>CIBERSEGURIDAD EDUCATIVA</p>
+
+</div>
+
+</div>
+
+<div class="acciones-login">
+
+<a class="boton-login" href="login.html">Iniciar sesión</a>
+<a class="boton-login" href="login.html">Registrarme</a>
+
+</div>
+
+</header>
+
+<div class="linea"></div>
+
+<main>
+
+<div class="izquierda">
+
+<div class="url-controls">
+
+<input
+type="text"
+id="url"
+placeholder="INGRESA URL..."
+>
+
+<button id="borrar-url" type="button" aria-label="Borrar URL">Borrar</button>
+
+</div>
+
+<button id="verificar">
+
+Verificación con IA
+
+</button>
+
+<!-- NUEVO -->
+<div class="loaderBox">
+
+<div class="loaderBar">
+
+<div class="progress" id="progress"></div>
+
+</div>
+
+<p id="estado"></p>
+
+</div>
+
+</div>
+
+<div class="derecha">
+
+<button class="modo" id="kids">
+
+Modo
+<br>
+Kids
+
+</button>
+
+<button class="modo" id="master">
+
+Modo
+<br>
+Master
+
+</button>
+
+</div>
+
+</main>
+
+<script src="script.js?v=9"></script>
+
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="session.js"></script>
+</body>
+</html>

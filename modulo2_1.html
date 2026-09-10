@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Pro - Sistema IDS Nivel Experto</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --bg: #020202;
+            --terminal-bg: #050a0f;
+            --neon-blue: #00e5ff;
+            --neon-red: #ff003c;
+            --neon-green: #00ff66;
+            --scanline: rgba(0, 229, 255, 0.04);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Share Tech Mono', monospace; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--neon-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* Efecto de monitor curvo CRT */
+        #crt-wrapper {
+            width: 95vw;
+            max-width: 1200px;
+            height: 90vh;
+            background: var(--terminal-bg);
+            border: 2px solid rgba(0, 229, 255, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.1), inset 0 0 50px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            transform-style: preserve-3d;
+            transform: rotateX(1deg);
+        }
+
+        /* Scanlines dinámicas */
+        #crt-wrapper::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 20;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* Viñeta para oscurecer los bordes */
+        #crt-wrapper::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+            z-index: 21;
+            pointer-events: none;
+        }
+
+        /* Barra Lateral Falsa de Tráfico HEX */
+        .hex-sidebar {
+            width: 200px;
+            border-right: 1px solid rgba(0, 229, 255, 0.2);
+            padding: 15px;
+            font-size: 0.8rem;
+            color: rgba(0, 229, 255, 0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0,0,0,0.4);
+        }
+
+        .hex-stream {
+            animation: scrollUp 20s linear infinite;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @keyframes scrollUp {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
+        }
+
+        /* Interfaz Principal */
+        #terminal {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            padding: 20px 30px;
+            border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 229, 255, 0.05);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .blinking-cursor {
+            width: 12px;
+            height: 24px;
+            background: var(--neon-blue);
+            display: inline-block;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .header-right-group {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        /* Botón de Volver */
+        .btn-back {
+            padding: 8px 18px;
+            font-size: 1rem;
+            font-weight: bold;
+            background: transparent;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            cursor: pointer;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+        }
+
+        .btn-back:hover {
+            background: var(--neon-blue);
+            color: var(--bg);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .hud-stats {
+            display: flex;
+            gap: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Modales */
+        .modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(2, 2, 2, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 100;
+            padding: 40px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal h2 { font-size: 3.5rem; margin-bottom: 20px; text-shadow: 0 0 20px currentColor; letter-spacing: 2px; }
+        .modal p { font-size: 1.3rem; max-width: 650px; margin-bottom: 40px; line-height: 1.6; color: #e0e0e0; }
+
+        .btn {
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2), inset 0 0 10px rgba(0, 229, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--neon-blue);
+            color: var(--bg);
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+
+        /* Caja de Intercepción */
+        .message-box {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(0, 229, 255, 0.02);
+            border: 1px solid rgba(0, 229, 255, 0.4);
+            padding: 35px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.05);
+            position: relative;
+        }
+
+        .message-box::before {
+            content: "[ PAQUETE INTERCEPTADO ]";
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--terminal-bg);
+            padding: 0 10px;
+            font-size: 1rem;
+            color: rgba(0, 229, 255, 0.6);
+        }
+
+        .sender-info {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 25px;
+            border-bottom: 1px dashed rgba(0, 229, 255, 0.3);
+            padding-bottom: 15px;
+        }
+
+        .avatar { font-size: 4.5rem; filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.4)); }
+        .sender-name { font-size: 1.8rem; color: #fff; letter-spacing: 1px; }
+        .sender-ip { font-size: 0.9rem; color: rgba(0, 229, 255, 0.5); margin-top: 5px; }
+        
+        .msg-text { font-size: 1.4rem; color: #d1d5db; line-height: 1.6; min-height: 90px; }
+
+        /* Botones de acción del juego */
+        .action-panel { display: flex; gap: 30px; width: 100%; max-width: 800px; }
+        
+        .btn-action {
+            flex: 1;
+            padding: 22px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border: 2px solid;
+            background: rgba(0,0,0,0.5);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.15s;
+            letter-spacing: 2px;
+        }
+
+        .btn-safe { color: var(--neon-green); border-color: var(--neon-green); }
+        .btn-safe:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 25px var(--neon-green); }
+
+        .btn-danger { color: var(--neon-red); border-color: var(--neon-red); }
+        .btn-danger:hover { background: var(--neon-red); color: #000; box-shadow: 0 0 25px var(--neon-red); }
+
+        /* Glitch y Vibración */
+        .glitch-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--neon-red) !important; box-shadow: inset 0 0 50px rgba(255,0,0,0.3) !important; }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        #log {
+            margin-top: 25px;
+            height: 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-shadow: 0 0 8px currentColor;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="crt-wrapper">
+        <div class="hex-sidebar">
+            <div class="hex-stream" id="hex-stream"></div>
+        </div>
+
+        <div id="terminal">
+            <header>
+                <h1>> SYS.IDS_CORE <span class="blinking-cursor"></span></h1>
+                <div class="header-right-group">
+                    <!-- BOTÓN PARA REGRESAR A Modulo_2.html -->
+                    <a href="Modulo_2.html" class="btn-back">[ VOLVER ]</a>
+                    
+                    <div class="hud-stats">
+                        <div>ESTADO: <span id="lives" style="color: var(--neon-green);">100%</span></div>
+                        <div>PAQUETES: <span id="score">0</span>/100</div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="game-area">
+                
+                <div id="start-screen" class="modal">
+                    <h2 style="color: var(--neon-blue);">MODO EXPERTO INICIADO</h2>
+                    <p>El tráfico de red ha aumentado. Deberás analizar 10 paquetes de datos y determinar su legitimidad. Detecta intentos de robo de código, falsos soportes técnicos y estafas en videojuegos.<br><br>Un solo error comprometerá severamente la infraestructura.</p>
+                    <button class="btn" onclick="startGame()">EJECUTAR_ANALISIS()</button>
+                </div>
+
+                <div id="gameover-screen" class="modal" style="display: none;">
+                    <h2 style="color: var(--neon-red);">SISTEMA VULNERADO</h2>
+                    <p>Múltiples brechas detectadas. Los atacantes han extraído los esquemas de las bases de datos y credenciales de usuario.</p>
+                    <button class="btn" style="color: var(--neon-red); border-color: var(--neon-red);" onclick="location.reload()">REINICIAR_NODO()</button>
+                </div>
+
+                <div id="victory-screen" class="modal" style="display: none;">
+                    <h2 style="color: var(--neon-green);">AMENAZAS PURGADAS</h2>
+                    <p>Excelente trabajo operativo. La base de datos, los repositorios de código y las cuentas de usuario están a salvo. Eres un verdadero analista de seguridad.</p>
+                    <button class="btn" style="color: var(--neon-green); border-color: var(--neon-green);" onclick="location.reload()">NUEVO_ESCANEO()</button>
+                </div>
+
+                <div class="message-box" id="msg-box" style="display: none;">
+                    <div class="sender-info">
+                        <div class="avatar" id="avatar">❓</div>
+                        <div>
+                            <div class="sender-name" id="sender">Cargando...</div>
+                            <div class="sender-ip" id="ip">IP: Resolviendo...</div>
+                        </div>
+                    </div>
+                    <div class="msg-text" id="text">...</div>
+                </div>
+
+                <div class="action-panel" id="controls" style="display: none;">
+                    <button class="btn-action btn-safe" onclick="analyze(true)">[ ORIGEN SEGURO ]</button>
+                    <button class="btn-action btn-danger" onclick="analyze(false)">[ PHISHING / MALWARE ]</button>
+                </div>
+
+                <div id="log"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Generador de Fondo Hexadecimal ---
+        const hexStream = document.getElementById('hex-stream');
+        let hexData = "";
+        for(let i=0; i<300; i++) {
+            hexData += Math.floor(Math.random()*16777215).toString(16).toUpperCase().padStart(6, '0') + " ";
+            if(i % 3 === 0) hexData += "\n";
+        }
+        hexStream.innerText = hexData + hexData;
+
+        // --- MOTOR DE AUDIO AVANZADO ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const sfx = {
+            playTone: (freq, type, duration, vol=0.1) => {
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            },
+            boot: () => { sfx.playTone(300, 'square', 0.1); setTimeout(() => sfx.playTone(800, 'square', 0.2), 100); },
+            success: () => { sfx.playTone(900, 'sine', 0.1); setTimeout(() => sfx.playTone(1300, 'sine', 0.2), 100); },
+            error: () => { sfx.playTone(120, 'sawtooth', 0.25, 0.3); setTimeout(() => sfx.playTone(90, 'sawtooth', 0.4, 0.3), 150); },
+            typing: () => { sfx.playTone(700 + Math.random()*300, 'square', 0.04, 0.015); },
+            win: () => { [440, 554, 659, 880, 1108].forEach((f, i) => { setTimeout(() => sfx.playTone(f, 'square', 0.4, 0.1), i * 150); }); }
+        };
+
+        // --- BASE DE DATOS EXTENDIDA (15+ Escenarios) ---
+        const database = [
+            { a: "❄️", n: "Blox_Trader_99", ip: "192.168.x.x", msg: "¡Bro! Encontré un script indetectable para tener la fruta Yeti infinita. Descárgalo desde este link de MediaFire y pon tu usuario: blox-yeti-free.zip", isFake: true },
+            { a: "🪖", n: "Harekat2_Oficial", ip: "45.22.11.x", msg: "Jugador, hemos detectado uso de herramientas externas en su cuenta. Inicie sesión en harekat2-appeals-support.com para evitar el baneo permanente de su dispositivo.", isFake: true },
+            { a: "🐘", n: "PostgreSQL_Admin", ip: "127.0.0.1", msg: "Alerta de sistema local: Múltiples intentos fallidos de conexión a la base de datos 'reservas_hotel'. Por favor, revise los logs directamente en el panel de control local de su servidor.", isFake: false },
+            { a: "🏆", n: "Comité_CIMAT", ip: "148.204.x.x", msg: "Estimado estudiante, para la emisión oficial de su diploma en desarrollo web, por favor verifique que su nombre esté correcto ingresando al portal interno de la institución educativa.", isFake: false },
+            { a: "☁️", n: "AWS_Security", ip: "18.232.x.x", msg: "Su instancia EC2 ha sido suspendida por facturación pendiente. Ingrese los datos de su tarjeta de crédito inmediatamente en: aws-billing-update-secure.net", isFake: true },
+            { a: "📱", n: "Soporte_IG", ip: "104.16.x.x", msg: "Tu cuenta será eliminada en 24h por violar normas de copyright. Verifica tu identidad para cancelar el proceso aquí: http://ig-verify-secure-login.tk", isFake: true },
+            { a: "🎮", n: "Steam_Guard", ip: "155.133.x.x", msg: "Se ha intentado acceder a tu cuenta desde Rusia. Si no fuiste tú, cambia tu contraseña desde la pestaña de seguridad de tu aplicación oficial de Steam.", isFake: false },
+            { a: "💸", n: "PayPal_Alert", ip: "198.54.x.x", msg: "Su pago de $450.00 ha sido procesado. Para cancelar esta transacción llame al 0800-FAKE-NUM y bríndenos los 16 dígitos de su tarjeta.", isFake: true },
+            { a: "🎁", n: "DiscordNitro", ip: "88.21.x.x", msg: "¡He comprado Nitro de 1 año para ti! Acepta el regalo haciendo clic en este enlace: discord.nltro-gift.ru/claim", isFake: true },
+            { a: "👥", n: "Dev_Team_Chat", ip: "Local_Network", msg: "Daniel, ya subí los cambios de HTML y CSS al repositorio de GitHub. Haz un pull antes de continuar con la conexión a la base de datos en PHP.", isFake: false },
+            { a: "📦", n: "Amazon_Delivery", ip: "54.239.x.x", msg: "No pudimos entregar su paquete por falta de aranceles aduaneros. Pague $2.99 a través de este enlace temporal para liberar su pedido.", isFake: true },
+            { a: "🛡️", n: "Windows_Defender", ip: "127.0.0.1", msg: "El escaneo programado del sistema ha finalizado. Se encontraron 0 amenazas. Puede revisar el historial de protección en la configuración de seguridad de su PC.", isFake: false },
+            { a: "🎬", n: "Netflix_Billing", ip: "52.71.x.x", msg: "Estimado cliente, su suscripción ha caducado. Actualice su método de pago ahora mismo para no perder acceso a sus series en: netflix-update-billing.info", isFake: true },
+            { a: "🔐", n: "Auth0_System", ip: "104.16.x.x", msg: "Recibimos una solicitud para restablecer la contraseña de su entorno de desarrollo. Si no fue usted, puede ignorar este correo de forma segura.", isFake: false },
+            { a: "✉️", n: "Gmail_Team", ip: "142.250.x.x", msg: "Tu almacenamiento está lleno (15GB/15GB). No podrás enviar ni recibir correos. Haz clic aquí para comprar 50GB extras por $0.99 al mes.", isFake: true }
+        ];
+
+        let score = 0;
+        let integrity = 100;
+        let currentMission = null;
+        let isTyping = false;
+        let scenariosLeft = [...database];
+
+        const ui = {
+            start: document.getElementById('start-screen'),
+            gameover: document.getElementById('gameover-screen'),
+            win: document.getElementById('victory-screen'),
+            box: document.getElementById('msg-box'),
+            controls: document.getElementById('controls'),
+            avatar: document.getElementById('avatar'),
+            sender: document.getElementById('sender'),
+            ip: document.getElementById('ip'),
+            text: document.getElementById('text'),
+            log: document.getElementById('log'),
+            crt: document.getElementById('crt-wrapper')
+        };
+
+        function startGame() {
+            sfx.boot();
+            ui.start.style.display = 'none';
+            ui.box.style.display = 'block';
+            ui.controls.style.display = 'flex';
+            score = 0;
+            integrity = 100;
+            scenariosLeft = [...database];
+            updateHUD();
+            nextPacket();
+        }
+
+        function typeWriter(element, text, speed, callback) {
+            isTyping = true;
+            element.innerHTML = "";
+            let i = 0;
+            ui.controls.style.opacity = '0.3';
+            ui.controls.style.pointerEvents = 'none';
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    if(i % 3 === 0) sfx.typing();
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    isTyping = false;
+                    ui.controls.style.opacity = '1';
+                    ui.controls.style.pointerEvents = 'auto';
+                    if(callback) callback();
+                }
+            }
+            type();
+        }
+
+        function nextPacket() {
+            ui.log.innerText = "";
+            if(scenariosLeft.length === 0) scenariosLeft = [...database];
+            
+            const rnd = Math.floor(Math.random() * scenariosLeft.length);
+            currentMission = scenariosLeft.splice(rnd, 1)[0];
+            
+            ui.avatar.innerText = currentMission.a;
+            ui.sender.innerText = currentMission.n;
+            ui.ip.innerText = "IP_ORIGEN: " + currentMission.ip;
+            typeWriter(ui.text, currentMission.msg, 20);
+        }
+
+        function analyze(playerTrusts) {
+            if (isTyping) return;
+            
+            const isCorrect = (playerTrusts === !currentMission.isFake);
+
+            if (isCorrect) {
+                sfx.success();
+                score += 10;
+                ui.log.style.color = "var(--neon-green)";
+                ui.log.innerText = "> [✓] ANÁLISIS CORRECTO. PAQUETE FILTRADO EXITOSAMENTE.";
+            } else {
+                sfx.error();
+                integrity -= 34;
+                ui.log.style.color = "var(--neon-red)";
+                ui.log.innerText = "> [!] ERROR CRÍTICO. MALWARE INYECTADO EN EL SISTEMA.";
+                ui.crt.classList.add('glitch-effect');
+                setTimeout(() => ui.crt.classList.remove('glitch-effect'), 400);
+            }
+
+            updateHUD();
+
+            if (integrity <= 0) {
+                setTimeout(() => {
+                    ui.box.style.display = 'none';
+                    ui.controls.style.display = 'none';
+                    ui.gameover.style.display = 'flex';
+                }, 1000);
+            } else if (score >= 100) {
+                setTimeout(() => {
+                    sfx.win();
+                    SafeMindProgress.complete(2, 1);
+                    ui.box.style.display = 'none';
+                    ui.controls.style.display = 'none';
+                    ui.win.style.display = 'flex';
+                }, 1000);
+            } else {
+                setTimeout(nextPacket, 1800);
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('score').innerText = score;
+            const livesEl = document.getElementById('lives');
+            livesEl.innerText = Math.max(0, integrity) + "%";
+            
+            if(integrity <= 35) {
+                livesEl.style.color = "var(--neon-red)";
+                livesEl.style.textShadow = "0 0 10px var(--neon-red)";
+            } else if (integrity <= 70) {
+                livesEl.style.color = "#ffdd00";
+                livesEl.style.textShadow = "0 0 10px #ffdd00";
+            } else {
+                livesEl.style.color = "var(--neon-green)";
+                livesEl.style.textShadow = "none";
+            }
+        }
+    </script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

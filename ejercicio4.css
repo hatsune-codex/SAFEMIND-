@@ -1,0 +1,349 @@
+:root {
+    --bg-main: linear-gradient(135deg, #050612 0%, #0d0a20 50%, #1e114d 100%);
+    --bg-nav: transparent;
+    --text-main: #ffffff;
+    --text-muted: #a0a0c0;
+    --cyan: #00d2ff;
+    --purple: #3b28cc;
+    --card-bg: #110f24;
+    --card-border: #382c75;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    background: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: var(--bg-nav);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-img {
+    height: 50px;
+    width: auto;
+}
+
+.logo-text h1 {
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.logo-text h1 span {
+    color: var(--cyan);
+}
+
+.logo-text p {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.separator {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 100%);
+    box-shadow: 0 0 8px var(--cyan);
+}
+
+.container {
+    padding: 20px 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.back-link {
+    color: var(--cyan);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.builder-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex: 1;
+}
+
+.builder-card {
+    width: 100%;
+    max-width: 620px;
+    background: var(--card-bg);
+    border: 3px solid var(--card-border);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+}
+
+.builder-card h2 {
+    font-size: 22px;
+    text-align: center;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--cyan), #9c27b0);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.subtitle {
+    font-size: 13px;
+    text-align: center;
+    color: var(--text-muted);
+    margin-top: -10px;
+    font-weight: 500;
+}
+
+.lego-shield-container {
+    width: 150px;
+    height: 150px;
+    background: #555;
+    border-radius: 20px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 0 rgba(0,0,0,0.4), 0 15px 25px rgba(0,0,0,0.5);
+    transition: background 0.4s ease, transform 0.3s ease;
+    border: 3px solid rgba(255,255,255,0.2);
+}
+
+.stud {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background: inherit;
+    border-radius: 50%;
+    top: -16px;
+    border: 3px solid rgba(255,255,255,0.2);
+    filter: brightness(1.1);
+}
+
+.stud.top-left {
+    left: 22px;
+}
+
+.stud.top-right {
+    right: 22px;
+}
+
+.stud::after {
+    content: '';
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background: inherit;
+    border-radius: 50%;
+    bottom: -130px;
+    border: 3px solid rgba(255,255,255,0.2);
+}
+
+.stud.top-left::after {
+    left: 0;
+}
+
+.stud.top-right::after {
+    right: 0;
+}
+
+.shield-core {
+    text-align: center;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+#shield-icon {
+    font-size: 45px;
+}
+
+#shield-verdict {
+    font-size: 11px;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.4);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.password-screen {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 2px dashed var(--card-border);
+    border-radius: 14px;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    gap: 8px;
+    flex-wrap: wrap;
+    overflow-x: auto;
+}
+
+.placeholder-text {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+}
+
+.lego-pill {
+    background: #ff5722;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 0 #b23c17;
+}
+
+.lego-pill span {
+    cursor: pointer;
+    background: rgba(0,0,0,0.2);
+    padding: 0 5px;
+    border-radius: 50%;
+    font-size: 11px;
+}
+
+.lego-pill span:hover {
+    background: #d32f2f;
+}
+
+.lego-sections {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.lego-category h3 {
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.blocks-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.lego-brick {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 13px;
+    border: none;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.lego-brick.red {
+    background: #e53935;
+    box-shadow: 0 4px 0 #b71c1c;
+}
+
+.lego-brick.blue {
+    background: #1e88e5;
+    box-shadow: 0 4px 0 #0d47a1;
+}
+
+.lego-brick.yellow {
+    background: #fbc02d;
+    color: #212121;
+    text-shadow: none;
+    box-shadow: 0 4px 0 #f57f17;
+}
+
+.lego-brick.green {
+    background: #43a047;
+    box-shadow: 0 4px 0 #1b5e20;
+}
+
+.lego-brick:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+}
+
+.lego-brick:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 currentColor;
+}
+
+.actions-row {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    font-size: 14px;
+}
+
+.clear-btn {
+    background: transparent;
+    border: 2px solid var(--text-muted);
+    color: var(--text-muted);
+}
+
+.clear-btn:hover {
+    border-color: #ff5252;
+    color: #ff5252;
+}
+
+.test-btn {
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,210,255,0.4);
+}
+
+.test-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+    background: #555;
+}

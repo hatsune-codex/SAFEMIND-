@@ -1,0 +1,25 @@
+SAFEMIND - INVITADO ANÓNIMO Y RECUPERACIÓN DE CONTRASEÑA
+
+1. ACTIVAR INVITADOS EN SUPABASE
+   Authentication > Providers (o Sign In / Providers) > Anonymous
+   Activa "Allow anonymous sign-ins".
+
+2. RECUPERACIÓN DE CONTRASEÑA
+   En Authentication > URL Configuration agrega a Redirect URLs:
+   https://hatsune-codex.github.io/SafeMind/**
+
+   Así Supabase permitirá redirigir a:
+   https://hatsune-codex.github.io/SafeMind/reset-password.html
+
+3. GITHUB
+   Sube también el archivo nuevo reset-password.html y los archivos modificados.
+   Si GitHub Pages publica desde una rama específica, haz el commit en esa misma rama.
+
+4. CÓMO FUNCIONA EL INVITADO
+   El botón "Entrar como invitado" llama a signInAnonymously().
+   Supabase crea un usuario anónimo con UUID. Tus políticas RLS siguen usando auth.uid(),
+   así que ese invitado solo puede ver y modificar su propio progreso.
+
+5. IMPORTANTE
+   Una cuenta anónima no tiene correo. Si el usuario borra los datos del navegador o cambia
+   de dispositivo, puede perder acceso a esa sesión y al progreso asociado.

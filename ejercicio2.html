@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMind - Atrapa la Contraseña</title>
+    <link rel="stylesheet" href="ejercicio2.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Audio cargado directamente desde internet (Música Arcade de Wikimedia) -->
+    <audio id="bg-music" loop crossorigin="anonymous">
+        <source src="https://commondatastorage.googleapis.com/codeskulptor-demos/riceracer_assets/music/race1.ogg" type="audio/ogg">
+        <!-- Fallback por si tu navegador prefiere mp3 -->
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Tu navegador no soporta audio.
+    </audio>
+    <!-- Barra de navegación -->
+    <header class="navbar">
+        <div class="logo-container">
+            <img src="logo.png" alt="SafeMind Logo" class="logo-img">
+            <div class="logo-text">
+                <h1>Safe<span>Mind</span></h1>
+                <p>CIBERSEGURIDAD EDUCATIVA</p>
+            </div>
+        </div>
+        
+        </header>
+
+    <div class="separator"></div>
+
+    <div class="container">
+        <a href="Modulo_1.html" class="back-link">← Volver al módulo</a>
+        <!-- Contenedor del Juego -->
+        <main class="game-wrapper">
+            <div class="game-header">
+                <h2>Nivel: <span id="level">1</span>/5</h2>
+                <div class="score-board">
+                    <p>Puntos: <span id="score">0</span>/300</p>
+                    <p>Vidas: <span id="lives">❤️❤️❤️</span></p>
+                </div>
+            </div>
+
+            <div class="game-area" id="game-area">
+                <!-- Pantalla de Inicio -->
+                <div id="start-screen" class="overlay-screen">
+                    <h2>Atrapa la Contraseña</h2>
+                    <p>Toca solo las contraseñas fuertes antes de que toquen el suelo. ¡Llega a 300 puntos para ganar!</p>
+                    <button id="start-btn" class="neon-btn">▶ JUGAR</button>
+                </div>
+
+                <!-- Pantalla de Victoria (NUEVA) -->
+                <div id="win-screen" class="overlay-screen hidden win-theme">
+                    <h2>¡Reto Superado! 🏆</h2>
+                    <p>¡Eres un maestro de la ciberseguridad!<br>Protegiste el sistema con éxito.</p>
+                    <button id="next-btn" class="neon-btn win-btn">VOLVER A JUGAR</button>
+                </div>
+
+                <!-- Pantalla de Game Over -->
+                <div id="game-over-screen" class="overlay-screen hidden">
+                    <h2>¡Fin del Juego! 💥</h2>
+                    <p>Puntuación Final: <span id="final-score">0</span></p>
+                    <button id="restart-btn" class="neon-btn error-btn">REINTENTAR</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="ejercicio2.js"></script>
+  <a href="modo_kids.html" class="btn-salir">Salir</a>
+  <style>
+    .btn-salir {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 9999;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff4d6d, #ff7b54);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(255, 77, 109, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-salir:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(255, 77, 109, 0.45);
+    }
+  </style>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

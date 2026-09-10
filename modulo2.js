@@ -1,0 +1,47 @@
+/* =========================================================
+   SafeMind · Modo Kids — Modulo1.js
+   ========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.remove('theme-light');
+
+  /* ---------- Tarjetas de módulos ---------- */
+  const moduleCards = document.querySelectorAll('.module-card');
+
+  const moduleNames = {
+    1: 'Módulo 01',
+    2: 'Detective de contraseñas',
+    3: 'Módulo 03',
+    4: 'Módulo 04',
+    5: 'Módulo 05'
+  };
+
+  function selectModule(card) {
+    moduleCards.forEach(c => c.classList.remove('is-selected'));
+    card.classList.add('is-selected');
+
+    const id = card.dataset.module;
+    const name = moduleNames[id] || `Módulo ${id}`;
+
+    // Evento personalizado por si otra parte de la app quiere escuchar la selección
+    document.dispatchEvent(new CustomEvent('modulo:seleccionado', {
+      detail: { modulo: Number(id), nombre: name }
+    }));
+
+    console.log(`SafeMind → Abriendo ${name}...`);
+
+    // Redirige a la página del ejercicio: ejercicio1.html, ejercicio2.html, ... ejercicio5.html
+    window.location.href = `ejercicio${id}.html`;
+  }
+
+  moduleCards.forEach(card => {
+    card.addEventListener('click', () => selectModule(card));
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectModule(card);
+      }
+    });
+  });
+
+});
