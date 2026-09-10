@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeMind - Ciberseguridad Educativa</title>
+  <link rel="stylesheet" href="modulo2.2.css">
+</head>
+<body>
+
+  <!-- NAVEGACIÓN PRINCIPAL -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <div class="brand">
+        <img src="logo.png" alt="SafeMind Logo" class="brand-logo">
+        <div class="brand-text">
+          <h1>Safe<span>Mind</span></h1>
+          <p>Ciberseguridad Educativa</p>
+        </div>
+      </div>
+      <a href="Modulo_2.html" class="back-link">← Volver al módulo</a>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO CENTRAL -->
+  <div class="main-wrapper">
+    <div class="game-card" id="gameCard">
+      
+      <div class="hud-grid">
+        <div><div class="hud-label">TIEMPO</div><div class="hud-val" id="timeVal">25.0s</div></div>
+        <div><div class="hud-label">PUNTOS</div><div class="hud-val" id="scoreVal">0</div></div>
+        <div><div class="hud-label">VELOCIDAD</div><div class="hud-val" id="speedVal">0 KM/H</div></div>
+        <div><div class="hud-label">PRECISIÓN</div><div class="hud-val" id="accVal">100%</div></div>
+        <div><div class="hud-label">RONDA</div><div class="hud-val" id="roundVal">1/15</div></div>
+      </div>
+
+      <div class="canvas-box">
+        <canvas id="raceCanvas" width="550" height="160"></canvas>
+      </div>
+
+      <div class="nitro-track"><div class="nitro-fill" id="nitroFill"></div></div>
+
+      <div class="chat-bubble" id="chatText">Cargando caso de ciberseguridad...</div>
+
+      <div class="options-group">
+        <button class="btn-opt btn-danger" onclick="choose('phishing')">A) 🚨 Amenaza / Phishing</button>
+        <button class="btn-opt" onclick="choose('safe')">B) ✅ Es seguro</button>
+      </div>
+
+      <div class="overlay" id="overlay">
+        <h2 id="overlayTitle">SafeMind Race</h2>
+        <p id="overlayDesc">Detecta las amenazas a tiempo para ganar la carrera contra el Atacante.</p>
+        <div class="summary-box" id="summaryBox" style="display: none;">
+          <div>Puntuación: <span id="finalScore">0</span></div>
+          <div>Velocidad Máx: <span id="maxSpeed">0 KM/H</span></div>
+          <div>Aciertos: <span id="ratio">0/15</span></div>
+        </div>
+        <button class="btn-play" onclick="startGame()">INICIAR CARRERA</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="modulo2.2.js"></script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

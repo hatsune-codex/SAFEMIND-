@@ -1,0 +1,3456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NO ACEPTES A NADIE</title>
+
+<style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+body{
+    background:#020204;
+    color:#ddd;
+    font-family:
+        "Courier New",
+        monospace;
+
+    transition:
+        filter .15s,
+        background .2s;
+}
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+:root{
+    --red:#ff003c;
+    --darkred:#6d001d;
+    --cyan:#00ffe1;
+    --white:#f4f4f4;
+    --gray:#666;
+    --black:#020204;
+}
+
+.btn-back-module{
+    position:fixed;
+    top:18px;
+    left:18px;
+    z-index:20;
+    padding:9px 14px;
+    border:1px solid var(--cyan);
+    background:rgba(2,2,4,.92);
+    color:var(--cyan);
+    font-family:"Courier New", monospace;
+    font-size:12px;
+    font-weight:700;
+    text-decoration:none;
+    transition:background .2s, color .2s, box-shadow .2s;
+}
+
+.btn-back-module:hover{
+    background:var(--cyan);
+    color:var(--black);
+    box-shadow:0 0 16px rgba(0,255,225,.5);
+}
+
+
+/* =========================================================
+   JUEGO
+========================================================= */
+
+#game{
+    width:100%;
+    height:100%;
+
+    display:grid;
+
+    grid-template-columns:
+        70px
+        220px
+        1fr
+        210px;
+
+    background:
+        radial-gradient(
+            circle at 50% 40%,
+            #151722 0%,
+            #08090d 45%,
+            #020204 100%
+        );
+
+    position:relative;
+    overflow:hidden;
+}
+
+
+/* =========================================================
+   BARRA SERVIDORES
+========================================================= */
+
+.servers{
+    background:#030305;
+    border-right:1px solid #191b22;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    padding-top:15px;
+
+    z-index:10;
+}
+
+.server{
+    width:45px;
+    height:45px;
+
+    margin-bottom:12px;
+
+    border-radius:14px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#11131a;
+
+    font-size:21px;
+
+    transition:.2s;
+}
+
+.server.active{
+    background:#00ffe1;
+    color:#000;
+
+    box-shadow:
+        0 0 20px #00ffe1;
+}
+
+.server.danger{
+    color:#ff003c;
+
+    animation:
+        serverGlitch .15s infinite;
+}
+
+@keyframes serverGlitch{
+
+    0%{
+        transform:translateX(0);
+    }
+
+    50%{
+        transform:translateX(5px);
+    }
+
+    100%{
+        transform:translateX(-5px);
+    }
+}
+
+
+/* =========================================================
+   CANALES
+========================================================= */
+
+.channels{
+    background:#0a0b10;
+    border-right:1px solid #1b1d25;
+
+    display:flex;
+    flex-direction:column;
+
+    z-index:10;
+}
+
+.profile{
+    padding:18px;
+
+    border-bottom:1px solid #1a1c23;
+
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.profile-avatar{
+    font-size:27px;
+}
+
+.profile strong{
+    display:block;
+    font-size:12px;
+}
+
+.profile small{
+    color:#00ffe1;
+    font-size:9px;
+}
+
+.channel-title{
+    padding:18px 15px 10px;
+
+    color:#555;
+
+    font-size:9px;
+
+    letter-spacing:2px;
+}
+
+.channel{
+    padding:11px 15px;
+
+    margin:3px 8px;
+
+    color:#777;
+
+    font-size:11px;
+}
+
+.channel.active{
+    color:#00ffe1;
+
+    background:
+        rgba(0,255,225,.05);
+
+    border-left:2px solid #00ffe1;
+}
+
+.progress{
+    margin-top:auto;
+
+    padding:17px;
+
+    border-top:1px solid #1b1d25;
+}
+
+.progress-label{
+    color:#555;
+    font-size:8px;
+
+    margin-bottom:8px;
+}
+
+.progress-bg{
+    width:100%;
+    height:5px;
+
+    background:#20222c;
+}
+
+#progress{
+    width:0%;
+    height:100%;
+
+    background:#00ffe1;
+
+    box-shadow:
+        0 0 12px #00ffe1;
+
+    transition:.5s;
+}
+
+#counter{
+    display:block;
+
+    margin-top:8px;
+
+    color:#555;
+
+    font-size:9px;
+}
+
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+.chat{
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+
+    position:relative;
+
+    z-index:5;
+}
+
+.header{
+    height:70px;
+
+    padding:15px 22px;
+
+    border-bottom:1px solid #191b22;
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    background:
+        rgba(5,6,10,.85);
+}
+
+.header h1{
+    font-size:15px;
+}
+
+.header h1 span{
+    color:#00ffe1;
+}
+
+.header p{
+    color:#555;
+    font-size:9px;
+    margin-top:5px;
+}
+
+.status{
+    color:#666;
+    font-size:8px;
+}
+
+.status-dot{
+    display:inline-block;
+
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:#ffc400;
+
+    box-shadow:
+        0 0 10px #ffc400;
+}
+
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.messages{
+    flex:1;
+
+    padding:20px;
+
+    overflow:hidden;
+}
+
+.system{
+    padding:15px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    border:1px solid #1a1c23;
+
+    font-size:11px;
+
+    max-width:700px;
+}
+
+.system strong{
+    color:#ffc400;
+}
+
+.system p{
+    margin-top:8px;
+
+    color:#666;
+
+    line-height:1.6;
+}
+
+
+/* =========================================================
+   TARJETA
+========================================================= */
+
+.decision{
+    padding:15px 20px 22px;
+}
+
+.card{
+    position:relative;
+
+    padding:20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #151823,
+            #07080c
+        );
+
+    border:
+        1px solid #242732;
+
+    box-shadow:
+        0 20px 70px rgba(0,0,0,.7);
+
+    transition:
+        border .3s,
+        box-shadow .3s;
+}
+
+.card::before{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:3px;
+    height:100%;
+
+    background:#00ffe1;
+
+    box-shadow:
+        0 0 15px #00ffe1;
+}
+
+.person{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.avatar{
+    width:60px;
+    height:60px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#11131a;
+
+    border:1px solid #292c37;
+
+    font-size:34px;
+}
+
+.person h2{
+    font-size:17px;
+}
+
+.person p{
+    color:#555;
+    font-size:9px;
+    margin-top:4px;
+}
+
+.online{
+    color:#00ffe1;
+    font-size:8px;
+}
+
+.message{
+    margin-top:17px;
+
+    padding:15px;
+
+    background:#030405;
+
+    border:1px solid #171920;
+}
+
+.message-label{
+    color:#444;
+
+    font-size:8px;
+
+    letter-spacing:2px;
+
+    margin-bottom:8px;
+}
+
+#messageText{
+    color:#ddd;
+
+    font-size:13px;
+
+    line-height:1.7;
+}
+
+.clues{
+    display:flex;
+    flex-wrap:wrap;
+
+    gap:6px;
+
+    margin-top:13px;
+}
+
+.clue{
+    padding:6px 8px;
+
+    border:1px solid #292c35;
+
+    background:#0b0d12;
+
+    color:#666;
+
+    font-size:8px;
+}
+
+.clue.warning{
+    color:#ff003c;
+
+    border-color:#6d001d;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.actions{
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr
+        1fr;
+
+    gap:8px;
+
+    margin-top:15px;
+}
+
+.actions button{
+    padding:13px;
+
+    background:#090a0f;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-weight:bold;
+
+    font-size:9px;
+
+    cursor:pointer;
+
+    transition:.15s;
+}
+
+.accept{
+    color:#00ffe1;
+
+    border:
+        1px solid #075f56;
+}
+
+.block{
+    color:#ff003c;
+
+    border:
+        1px solid #6d001d;
+}
+
+.investigate{
+    color:#aaa;
+
+    border:
+        1px solid #333;
+}
+
+.actions button:hover{
+    transform:translateY(-2px);
+
+    filter:
+        brightness(1.5);
+}
+
+
+/* =========================================================
+   MIEMBROS
+========================================================= */
+
+.members{
+    background:#08090d;
+
+    border-left:1px solid #191b22;
+
+    padding:15px;
+
+    overflow:hidden;
+
+    z-index:10;
+}
+
+.members-title{
+    display:flex;
+    justify-content:space-between;
+
+    color:#555;
+
+    font-size:8px;
+
+    margin-bottom:12px;
+}
+
+.member{
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:8px 3px;
+
+    color:#777;
+
+    font-size:9px;
+
+    transition:.2s;
+}
+
+.member.active{
+    color:#00ffe1;
+}
+
+.member.corrupted{
+    color:#ff003c;
+
+    text-shadow:
+        0 0 10px #ff003c;
+
+    animation:
+        memberCorrupt .2s infinite;
+}
+
+@keyframes memberCorrupt{
+
+    0%{
+        transform:translateX(0);
+    }
+
+    50%{
+        transform:translateX(-4px);
+    }
+
+    100%{
+        transform:translateX(3px);
+    }
+}
+
+
+/* =========================================================
+   OVERLAYS
+========================================================= */
+
+#horror{
+    position:fixed;
+
+    inset:0;
+
+    pointer-events:none;
+
+    z-index:9000;
+
+    overflow:hidden;
+}
+
+
+/* ruido */
+
+#noise{
+    position:absolute;
+
+    inset:-50%;
+
+    opacity:0;
+
+    background-image:
+        repeating-radial-gradient(
+            circle at 20% 30%,
+            rgba(255,255,255,.5) 0 1px,
+            transparent 1px 3px
+        );
+
+    mix-blend-mode:screen;
+}
+
+#noise.active{
+    animation:
+        noise .2s steps(4);
+}
+
+@keyframes noise{
+
+    0%{
+        opacity:0;
+        transform:translate(0);
+    }
+
+    25%{
+        opacity:.15;
+        transform:translate(-20px,15px);
+    }
+
+    50%{
+        opacity:.05;
+        transform:translate(15px,-10px);
+    }
+
+    75%{
+        opacity:.2;
+        transform:translate(-8px,8px);
+    }
+
+    100%{
+        opacity:0;
+    }
+}
+
+
+/* =========================================================
+   SCANLINES
+========================================================= */
+
+#scanlines{
+    position:absolute;
+
+    inset:0;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 3px,
+            rgba(255,255,255,.025) 4px
+        );
+
+    opacity:.4;
+}
+
+
+/* =========================================================
+   FLASH
+========================================================= */
+
+#flash{
+    position:absolute;
+
+    inset:0;
+
+    background:#fff;
+
+    opacity:0;
+}
+
+#flash.red{
+    background:#ff003c;
+}
+
+#flash.cyan{
+    background:#00ffe1;
+}
+
+#flash.active{
+    animation:
+        flash .18s steps(3);
+}
+
+@keyframes flash{
+
+    0%{
+        opacity:0;
+    }
+
+    20%{
+        opacity:.8;
+    }
+
+    35%{
+        opacity:0;
+    }
+
+    50%{
+        opacity:.5;
+    }
+
+    100%{
+        opacity:0;
+    }
+}
+
+
+/* =========================================================
+   PANTALLA NEGRA
+========================================================= */
+
+#black{
+    position:absolute;
+
+    inset:0;
+
+    background:#000;
+
+    opacity:0;
+}
+
+#black.active{
+    animation:
+        black .9s steps(5);
+}
+
+@keyframes black{
+
+    0%{
+        opacity:0;
+    }
+
+    15%{
+        opacity:1;
+    }
+
+    55%{
+        opacity:1;
+    }
+
+    70%{
+        opacity:.2;
+    }
+
+    78%{
+        opacity:1;
+    }
+
+    100%{
+        opacity:0;
+    }
+}
+
+
+/* =========================================================
+   HORROR TEXT
+========================================================= */
+
+#terrorText{
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    width:90%;
+
+    transform:
+        translate(-50%,-50%);
+
+    text-align:center;
+
+    color:#fff;
+
+    font-size:
+        clamp(
+            25px,
+            6vw,
+            80px
+        );
+
+    font-weight:bold;
+
+    text-shadow:
+        5px 0 #ff003c,
+        -5px 0 #00ffe1,
+        0 0 30px #ff003c;
+
+    opacity:0;
+}
+
+#terrorText.show{
+    animation:
+        terrorText .9s steps(4);
+}
+
+@keyframes terrorText{
+
+    0%{
+        opacity:0;
+
+        transform:
+            translate(-50%,-50%)
+            scale(.2);
+    }
+
+    10%{
+        opacity:1;
+    }
+
+    18%{
+        transform:
+            translate(
+                calc(-50% - 30px),
+                -50%
+            )
+            skewX(30deg);
+    }
+
+    28%{
+        transform:
+            translate(
+                calc(-50% + 30px),
+                -50%
+            )
+            skewX(-30deg);
+    }
+
+    40%{
+        opacity:.2;
+    }
+
+    50%{
+        opacity:1;
+    }
+
+    65%{
+        transform:
+            translate(-50%,-50%)
+            scale(1.2);
+    }
+
+    100%{
+        opacity:0;
+    }
+}
+
+
+/* =========================================================
+   JUMPSCARE
+========================================================= */
+
+#jumpscare{
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    opacity:0;
+}
+
+#jumpscare.show{
+    animation:
+        jump .7s steps(4);
+}
+
+.face{
+    font-size:
+        clamp(
+            120px,
+            30vw,
+            400px
+        );
+
+    filter:
+        drop-shadow(0 0 15px #ff003c)
+        drop-shadow(0 0 50px #ff003c);
+}
+
+#jumpscare.show .face{
+    animation:
+        face .7s steps(4);
+}
+
+@keyframes jump{
+
+    0%{
+        opacity:0;
+    }
+
+    15%{
+        opacity:1;
+    }
+
+    23%{
+        opacity:0;
+    }
+
+    35%{
+        opacity:1;
+    }
+
+    65%{
+        opacity:1;
+    }
+
+    100%{
+        opacity:0;
+    }
+}
+
+@keyframes face{
+
+    0%{
+        transform:scale(.05);
+    }
+
+    15%{
+        transform:scale(2);
+    }
+
+    25%{
+        transform:scale(.7);
+    }
+
+    40%{
+        transform:scale(1.4);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+#errorWindow{
+    position:absolute;
+
+    width:min(480px,85%);
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    padding:25px;
+
+    background:#050505;
+
+    border:2px solid #ff003c;
+
+    box-shadow:
+        0 0 60px rgba(255,0,60,.6);
+
+    opacity:0;
+}
+
+#errorWindow.show{
+    animation:
+        error .9s steps(4);
+}
+
+#errorWindow h2{
+    color:#ff003c;
+
+    margin-bottom:12px;
+}
+
+#errorWindow p{
+    color:#777;
+
+    font-size:10px;
+
+    line-height:1.6;
+}
+
+#errorCode{
+    margin-top:15px;
+
+    padding:10px;
+
+    background:#000;
+
+    color:#ff003c;
+
+    font-size:9px;
+}
+
+@keyframes error{
+
+    0%{
+        opacity:0;
+
+        transform:
+            translate(-50%,-50%)
+            scale(.6);
+    }
+
+    10%{
+        opacity:1;
+    }
+
+    20%{
+        transform:
+            translate(
+                calc(-50% - 20px),
+                -50%
+            );
+    }
+
+    30%{
+        transform:
+            translate(
+                calc(-50% + 20px),
+                -50%
+            );
+    }
+
+    40%{
+        transform:
+            translate(-50%,-50%);
+    }
+
+    70%{
+        opacity:1;
+    }
+
+    100%{
+        opacity:0;
+    }
+}
+
+
+/* =========================================================
+   GRIETAS
+========================================================= */
+
+#cracks{
+    position:absolute;
+
+    inset:0;
+
+    opacity:0;
+
+    transition:
+        opacity 1s;
+}
+
+.crack{
+    position:absolute;
+
+    height:2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.8),
+            transparent
+        );
+
+    transform-origin:left;
+
+    box-shadow:
+        0 0 5px rgba(255,255,255,.5);
+}
+
+.crack.one{
+    width:400px;
+
+    top:20%;
+
+    left:10%;
+
+    transform:
+        rotate(25deg);
+}
+
+.crack.two{
+    width:300px;
+
+    top:30%;
+
+    right:8%;
+
+    transform:
+        rotate(-40deg);
+}
+
+.crack.three{
+    width:500px;
+
+    bottom:25%;
+
+    left:20%;
+
+    transform:
+        rotate(-15deg);
+}
+
+.crack.four{
+    width:250px;
+
+    top:65%;
+
+    right:15%;
+
+    transform:
+        rotate(50deg);
+}
+
+.crack.five{
+    width:350px;
+
+    top:10%;
+
+    left:55%;
+
+    transform:
+        rotate(75deg);
+}
+
+.crack.six{
+    width:450px;
+
+    bottom:10%;
+
+    right:30%;
+
+    transform:
+        rotate(-55deg);
+}
+
+
+/* =========================================================
+   TEMBLOR
+========================================================= */
+
+body.shake{
+    animation:
+        shake .35s steps(6);
+}
+
+@keyframes shake{
+
+    0%{
+        transform:translate(0);
+    }
+
+    15%{
+        transform:translate(-12px,7px);
+    }
+
+    30%{
+        transform:translate(13px,-8px);
+    }
+
+    45%{
+        transform:translate(-8px,-5px);
+    }
+
+    60%{
+        transform:translate(10px,6px);
+    }
+
+    75%{
+        transform:translate(-5px,2px);
+    }
+
+    100%{
+        transform:translate(0);
+    }
+}
+
+
+/* =========================================================
+   GLITCH HORIZONTAL
+========================================================= */
+
+.glitch-strip{
+    position:absolute;
+
+    height:
+        3px;
+
+    background:#ff003c;
+
+    box-shadow:
+        0 0 10px #ff003c;
+
+    opacity:0;
+
+    left:0;
+}
+
+.glitch-strip.show{
+    animation:
+        strip .3s steps(3);
+}
+
+@keyframes strip{
+
+    0%{
+        opacity:0;
+
+        width:0;
+    }
+
+    20%{
+        opacity:1;
+
+        width:80%;
+    }
+
+    50%{
+        transform:
+            translateX(30px);
+    }
+
+    100%{
+        opacity:0;
+
+        width:100%;
+    }
+}
+
+
+/* =========================================================
+   CURSOR EXTRAÑO
+========================================================= */
+
+body.horrorCursor{
+    cursor:none;
+}
+
+body.horrorCursor::after{
+    content:"";
+
+    position:fixed;
+
+    width:10px;
+    height:10px;
+
+    border-radius:50%;
+
+    background:#ff003c;
+
+    box-shadow:
+        0 0 20px #ff003c;
+
+    z-index:99999;
+
+    pointer-events:none;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+#modal{
+    position:fixed;
+
+    inset:0;
+
+    background:
+        rgba(0,0,0,.9);
+
+    z-index:10000;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+}
+
+.modal-box{
+    width:min(450px,90%);
+
+    padding:30px;
+
+    background:#0b0c11;
+
+    border:1px solid #333;
+
+    text-align:center;
+}
+
+.modal-icon{
+    font-size:55px;
+}
+
+.modal-box h2{
+    margin:15px 0;
+
+    font-size:20px;
+}
+
+.modal-box p{
+    color:#777;
+
+    font-size:11px;
+
+    line-height:1.7;
+}
+
+.modal-scores{
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap:10px;
+
+    margin:20px 0;
+}
+
+.score{
+    padding:15px;
+
+    background:#050608;
+}
+
+.score small{
+    display:block;
+
+    color:#555;
+
+    font-size:8px;
+}
+
+.score strong{
+    display:block;
+
+    margin-top:5px;
+
+    color:#00ffe1;
+
+    font-size:25px;
+}
+
+#next{
+    width:100%;
+
+    padding:13px;
+
+    border:0;
+
+    background:#00ffe1;
+
+    color:#000;
+
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+#start{
+    position:fixed;
+
+    inset:0;
+
+    background:
+        radial-gradient(
+            circle,
+            #11131d,
+            #010102 75%
+        );
+
+    z-index:20000;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+}
+
+.start-box{
+    width:min(650px,90%);
+
+    padding:45px;
+
+    background:
+        rgba(5,6,9,.95);
+
+    border:1px solid #242733;
+
+    text-align:center;
+
+    box-shadow:
+        0 0 100px rgba(0,0,0,.9);
+}
+
+.start-icon{
+    font-size:70px;
+}
+
+.start-box h1{
+    margin:15px 0;
+
+    font-size:
+        clamp(
+            35px,
+            7vw,
+            70px
+        );
+
+    color:#00ffe1;
+
+    letter-spacing:4px;
+
+    text-shadow:
+        3px 0 #ff003c,
+        -2px 0 #8a00ff;
+}
+
+.start-box p{
+    color:#555;
+
+    font-size:11px;
+
+    line-height:1.7;
+}
+
+.warning{
+    margin:25px 0;
+
+    padding:18px;
+
+    background:#050506;
+
+    border-left:
+        3px solid #ff003c;
+
+    color:#777;
+
+    text-align:left;
+
+    font-size:9px;
+
+    line-height:1.8;
+}
+
+.warning b{
+    color:#ff003c;
+}
+
+#startButton{
+    width:100%;
+
+    padding:16px;
+
+    border:0;
+
+    background:#00ffe1;
+
+    color:#000;
+
+    font-weight:bold;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    cursor:pointer;
+}
+
+#startButton:hover{
+    box-shadow:
+        0 0 35px #00ffe1;
+}
+
+
+/* =========================================================
+   FINAL
+========================================================= */
+
+#ending{
+    position:fixed;
+
+    inset:0;
+
+    z-index:20000;
+
+    background:#000;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+}
+
+.ending-box{
+    width:min(650px,90%);
+
+    padding:40px;
+}
+
+.ending-box .icon{
+    font-size:80px;
+}
+
+.ending-box h1{
+    margin:20px 0;
+
+    color:#ff003c;
+
+    font-size:
+        clamp(
+            30px,
+            6vw,
+            60px
+        );
+}
+
+.ending-box p{
+    color:#555;
+
+    font-size:11px;
+
+    line-height:1.8;
+}
+
+.final-score{
+    margin:25px 0;
+
+    color:#00ffe1;
+
+    font-size:40px;
+}
+
+#restart{
+    width:100%;
+
+    padding:14px;
+
+    background:#00ffe1;
+
+    border:0;
+
+    font-weight:bold;
+}
+
+.next-module{
+    width:100%;
+    padding:14px;
+    margin-top:10px;
+    background:#ff003c;
+    color:#fff;
+    border:1px solid #ff003c;
+    font-family:"Courier New", monospace;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.2s;
+    box-shadow:0 0 18px rgba(255,0,60,.25);
+}
+
+.next-module:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.3);
+    box-shadow:0 0 30px rgba(255,0,60,.6);
+}
+
+.hidden{
+    display:none!important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:900px){
+
+    #game{
+        grid-template-columns:
+            60px
+            1fr;
+    }
+
+    .channels,
+    .members{
+        display:none;
+    }
+}
+
+@media(max-width:600px){
+
+    .actions{
+        grid-template-columns:1fr;
+    }
+
+    .decision{
+        padding:10px;
+    }
+
+    .card{
+        padding:15px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+
+<!-- =======================================================
+     INICIO
+======================================================= -->
+
+<div id="start">
+
+    <div class="start-box">
+
+        <div class="start-icon">
+            🎮
+        </div>
+
+        <h1>
+            NO ACEPTES<br>
+            A NADIE
+        </h1>
+
+        <p>
+            Acabas de abrir las notificaciones
+            de tu juego favorito.
+        </p>
+
+        <div class="warning">
+
+            <b>⚠ ADVERTENCIA DEL SISTEMA</b>
+
+            <br><br>
+
+            Hay 15 personas.
+
+            <br>
+
+            Algunas quieren ser tus amigos.
+
+            <br>
+
+            Algunas quieren tu contraseña.
+
+            <br>
+
+            Algunas quieren engañarte.
+
+            <br><br>
+
+            Pero hay algo que el sistema
+            no puede comprobar.
+
+            <br><br>
+
+            <b>
+                NO SABEMOS QUIÉN ES INOCENTE.
+            </b>
+
+        </div>
+
+        <button id="startButton">
+            ENTRAR
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     JUEGO
+======================================================= -->
+
+<div id="game" class="hidden">
+
+
+    <aside class="servers">
+
+        <div class="server active">
+            🎮
+        </div>
+
+        <div class="server">
+            👾
+        </div>
+
+        <div class="server">
+            🔥
+        </div>
+
+        <div class="server danger">
+            ?
+        </div>
+
+    </aside>
+
+
+    <aside class="channels">
+
+        <div class="profile">
+
+            <div class="profile-avatar">
+                👦
+            </div>
+
+            <div>
+
+                <strong>
+                    Player_01
+                </strong>
+
+                <small>
+                    ● jugando
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="channel-title">
+            SERVIDOR
+        </div>
+
+        <div class="channel active">
+            # 🔔 notificaciones
+        </div>
+
+        <div class="channel">
+            # 💬 general
+        </div>
+
+        <div class="channel">
+            # 👥 amigos
+        </div>
+
+        <div class="channel">
+            # 🎮 partidas
+        </div>
+
+        <div class="channel">
+            # 🛠 soporte
+        </div>
+
+
+        <div class="progress">
+
+            <div class="progress-label">
+                REVISIÓN DE USUARIOS
+            </div>
+
+            <div class="progress-bg">
+
+                <div id="progress"></div>
+
+            </div>
+
+            <span id="counter">
+                1 / 15
+            </span>
+
+        </div>
+
+    </aside>
+
+
+    <main class="chat">
+
+        <header class="header">
+
+            <div>
+
+                <h1>
+                    <span>#</span>
+                    notificaciones
+                </h1>
+
+                <p id="status">
+                    Revisa antes de aceptar.
+                </p>
+
+            </div>
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                SERVIDOR ACTIVO
+
+            </div>
+
+        </header>
+
+
+        <div class="messages">
+
+            <div class="system">
+
+                <strong>
+                    ⚠ SISTEMA
+                </strong>
+
+                <p>
+                    Han llegado nuevas solicitudes.
+                    Examina cada mensaje cuidadosamente.
+                    Las apariencias pueden engañar.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <section class="decision">
+
+            <div class="card" id="card">
+
+                <div class="person">
+
+                    <div class="avatar" id="avatar">
+                        👤
+                    </div>
+
+                    <div>
+
+                        <h2 id="name">
+                            Usuario
+                        </h2>
+
+                        <p id="tag">
+                            @usuario
+                        </p>
+
+                        <span class="online">
+                            ● EN LÍNEA
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="message">
+
+                    <div class="message-label">
+                        MENSAJE
+                    </div>
+
+                    <div id="messageText">
+                        ...
+                    </div>
+
+                </div>
+
+
+                <div id="clues" class="clues"></div>
+
+
+                <div class="actions">
+
+                    <button
+                        class="accept"
+                        id="accept">
+                        ✓ ACEPTAR
+                    </button>
+
+                    <button
+                        class="block"
+                        id="block">
+                        ✕ BLOQUEAR
+                    </button>
+
+                    <button
+                        class="investigate"
+                        id="investigate">
+                        ◉ INVESTIGAR
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <aside class="members">
+
+        <div class="members-title">
+
+            <span>
+                MIEMBROS
+            </span>
+
+            <span>
+                15
+            </span>
+
+        </div>
+
+        <div id="members"></div>
+
+    </aside>
+
+</div>
+
+
+<!-- =======================================================
+     HORROR
+======================================================= -->
+
+<div id="horror">
+
+    <div id="scanlines"></div>
+
+    <div id="noise"></div>
+
+    <div id="flash"></div>
+
+    <div id="black"></div>
+
+    <div id="cracks">
+
+        <div class="crack one"></div>
+        <div class="crack two"></div>
+        <div class="crack three"></div>
+        <div class="crack four"></div>
+        <div class="crack five"></div>
+        <div class="crack six"></div>
+
+    </div>
+
+    <div id="terrorText">
+        NO LO ACEPTES
+    </div>
+
+    <div id="jumpscare">
+
+        <div class="face" id="face">
+            👁️
+        </div>
+
+    </div>
+
+    <div id="errorWindow">
+
+        <h2>
+            ⚠ SYSTEM ERROR
+        </h2>
+
+        <p>
+            Se detectó una conexión que no
+            pertenece a esta sesión.
+        </p>
+
+        <div id="errorCode">
+            USER_16 // UNKNOWN_CONNECTION
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     MODAL
+======================================================= -->
+
+<div id="modal" class="hidden">
+
+    <div class="modal-box">
+
+        <div
+            class="modal-icon"
+            id="modalIcon">
+            ✓
+        </div>
+
+        <h2 id="modalTitle">
+            DECISIÓN
+        </h2>
+
+        <p id="modalText">
+        </p>
+
+        <div class="modal-scores">
+
+            <div class="score">
+
+                <small>
+                    CORRECTAS
+                </small>
+
+                <strong id="correctScore">
+                    0
+                </strong>
+
+            </div>
+
+            <div class="score">
+
+                <small>
+                    RIESGO
+                </small>
+
+                <strong id="riskScore">
+                    0%
+                </strong>
+
+            </div>
+
+        </div>
+
+        <button id="next">
+            CONTINUAR
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     FINAL
+======================================================= -->
+
+<div id="ending" class="hidden">
+
+    <div class="ending-box">
+
+        <div class="icon" id="endingIcon">
+            🔐
+        </div>
+
+        <h1 id="endingTitle">
+            SESIÓN FINALIZADA
+        </h1>
+
+        <p id="endingText">
+        </p>
+
+        <div class="final-score">
+
+            <span id="finalScore">
+                0 / 15
+            </span>
+
+        </div>
+
+        <button id="restart">
+            VOLVER A JUGAR
+        </button>
+
+        <button id="nextModule" class="next-module">
+            ▶ CONTINUAR AL MÓDULO 3
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   PERSONAS
+========================================================= */
+
+const people=[
+
+{
+avatar:"🧑‍🎮",
+name:"PixelMaster",
+tag:"@PixelMaster_77",
+message:"¡Hola! Vi que jugamos al mismo juego. ¿Quieres agregarme? Podemos jugar una partida juntos.",
+clues:[
+"Cuenta creada hace 2 años",
+"Amigos en común",
+"No pide datos"
+],
+safe:true,
+reason:"No hay una solicitud peligrosa."
+},
+
+{
+avatar:"🧔",
+name:"Admin_Oficial",
+tag:"@Admin_Official",
+message:"Detectamos un problema con tu cuenta. Necesitamos tu contraseña para verificar que eres el propietario.",
+clues:[
+"Pide contraseña",
+"Parece administrador",
+"No está verificado"
+],
+safe:false,
+reason:"Un administrador no necesita tu contraseña."
+},
+
+{
+avatar:"👩‍💻",
+name:"Luna",
+tag:"@luna.play",
+message:"Hola :) ¿Quieres entrar al grupo? Somos varios jugadores y hacemos partidas todas las noches.",
+clues:[
+"Conversación normal",
+"No pide datos",
+"Perfil activo"
+],
+safe:true,
+reason:"Es una invitación social normal."
+},
+
+{
+avatar:"🤖",
+name:"FREE_GEMS",
+tag:"@FREE_GEMS_NOW",
+message:"¡¡¡GANASTE 10,000 GEMAS!!! 💎 Inicia sesión inmediatamente para reclamarlas.",
+clues:[
+"Premio inesperado",
+"Urgencia",
+"Pide iniciar sesión"
+],
+safe:false,
+reason:"Es un patrón típico de phishing."
+},
+
+{
+avatar:"🧑",
+name:"Alex_503",
+tag:"@alex_503",
+message:"Bro 😭 ¿qué nivel eres? Yo apenas empecé y no entiendo cómo mejorar mis personajes.",
+clues:[
+"Habla del juego",
+"Sin enlaces",
+"No pide información"
+],
+safe:true,
+reason:"Es una conversación normal."
+},
+
+{
+avatar:"👨",
+name:"Soporte",
+tag:"@support_game_help",
+message:"TU CUENTA SERÁ ELIMINADA EN 10 MINUTOS. HAZ CLIC AHORA PARA EVITARLO.",
+clues:[
+"Amenaza",
+"Urgencia",
+"Enlace desconocido"
+],
+safe:false,
+reason:"El miedo y la urgencia son señales de estafa."
+},
+
+{
+avatar:"👩",
+name:"Mika",
+tag:"@MikaChan",
+message:"Tu skin está genial jajaja. ¿Dónde la conseguiste?",
+clues:[
+"Conversación normal",
+"No solicita datos",
+"Relacionado con juego"
+],
+safe:true,
+reason:"No pide información privada."
+},
+
+{
+avatar:"🕵️",
+name:"GameSecurity",
+tag:"@security_team",
+message:"Necesitamos tu correo, contraseña y código de verificación para comprobar tu identidad.",
+clues:[
+"Pide contraseña",
+"Pide código",
+"No verificado"
+],
+safe:false,
+reason:"Nunca debes compartir códigos de verificación."
+},
+
+{
+avatar:"🧑‍🦱",
+name:"RayoAzul",
+tag:"@RayoAzul",
+message:"¿Quieres jugar una partida? Estoy buscando compañero para el modo difícil.",
+clues:[
+"Solicitud normal",
+"Sin enlaces",
+"Sin datos privados"
+],
+safe:true,
+reason:"No hay señales claras de peligro."
+},
+
+{
+avatar:"👹",
+name:"HACKER_PRO",
+tag:"@hack_everything",
+message:"Puedo duplicarte todos tus objetos 😎. Solo necesito entrar a tu cuenta durante cinco minutos.",
+clues:[
+"Promesa imposible",
+"Solicita acceso",
+"Posible robo"
+],
+safe:false,
+reason:"Nunca permitas acceso a tu cuenta."
+},
+
+{
+avatar:"👨‍🎤",
+name:"DarkPlayer",
+tag:"@darkplayer",
+message:"Vi que buscas compañeros. Yo también estoy buscando equipo. ¿Te unes?",
+clues:[
+"Relacionado con juego",
+"No pide información",
+"Mensaje normal"
+],
+safe:true,
+reason:"No hay señales claras de fraude."
+},
+
+{
+avatar:"🧓",
+name:"Tío_Robux",
+tag:"@gift_100",
+message:"Te voy a regalar monedas premium. Solo dime el código que llegará a tu teléfono.",
+clues:[
+"Pide código privado",
+"Regalo sospechoso",
+"Posible robo"
+],
+safe:false,
+reason:"Los códigos de seguridad son privados."
+},
+
+{
+avatar:"👩‍🦰",
+name:"Sofi",
+tag:"@Sofi_Games",
+message:"Hola 👋 Me gustó mucho tu estrategia en la última partida. ¡Jugaste bastante bien!",
+clues:[
+"Mensaje positivo",
+"No pide información",
+"Perfil normal"
+],
+safe:true,
+reason:"Es una interacción normal."
+},
+
+{
+avatar:"👤",
+name:"SYSTEM_HELP",
+tag:"@system_help_01",
+message:"ERROR CRÍTICO. Tu cuenta fue comprometida. Descarga y ejecuta este archivo para repararla.",
+clues:[
+"Archivo desconocido",
+"Mensaje alarmista",
+"Usuario no oficial"
+],
+safe:false,
+reason:"No ejecutes archivos desconocidos."
+},
+
+{
+avatar:"🧑‍🚀",
+name:"NovaPlayer",
+tag:"@nova_plays",
+message:"Hola 👋 Somos varios jugadores y vamos a crear una sala privada. ¿Quieres venir?",
+clues:[
+"Invitación social",
+"No pide contraseña",
+"Sin amenazas"
+],
+safe:true,
+reason:"No existen señales claras de fraude."
+}
+
+];
+
+document.getElementById("nextModule").onclick = () => {
+    window.location.href = "Modulo_3.html";
+};
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let current=0;
+let correct=0;
+let risk=0;
+let investigated=false;
+
+let audio=null;
+
+
+/* =========================================================
+   ELEMENTOS
+========================================================= */
+
+const $=id=>document.getElementById(id);
+
+const start=$("start");
+const game=$("game");
+const modal=$("modal");
+const ending=$("ending");
+
+const progress=$("progress");
+const counter=$("counter");
+
+const avatar=$("avatar");
+const nameEl=$("name");
+const tag=$("tag");
+const messageText=$("messageText");
+const clues=$("clues");
+
+const members=$("members");
+
+const horror=$("horror");
+const flash=$("flash");
+const black=$("black");
+const noise=$("noise");
+const cracks=$("cracks");
+const terrorText=$("terrorText");
+const jumpscare=$("jumpscare");
+const face=$("face");
+const errorWindow=$("errorWindow");
+
+
+/* =========================================================
+   AUDIO GENERADO
+========================================================= */
+
+function initAudio(){
+
+    if(audio)return;
+
+    audio=
+        new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
+
+}
+
+function horrorSound(type="low"){
+
+    if(!audio)return;
+
+    const now=audio.currentTime;
+
+    if(type==="low"){
+        const osc=audio.createOscillator();
+        const gain=audio.createGain();
+        osc.type="sawtooth";
+        osc.frequency.setValueAtTime(90,now);
+        osc.frequency.exponentialRampToValueAtTime(25,now+.6);
+        gain.gain.setValueAtTime(.0001,now);
+        gain.gain.exponentialRampToValueAtTime(.15,now+.03);
+        gain.gain.exponentialRampToValueAtTime(.0001,now+.7);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now);
+        osc.stop(now+.7);
+    }
+
+    if(type==="high"){
+        const osc=audio.createOscillator();
+        const gain=audio.createGain();
+        osc.type="sine";
+        osc.frequency.setValueAtTime(900,now);
+        osc.frequency.exponentialRampToValueAtTime(120,now+.4);
+        gain.gain.setValueAtTime(.0001,now);
+        gain.gain.exponentialRampToValueAtTime(.18,now+.02);
+        gain.gain.exponentialRampToValueAtTime(.0001,now+.45);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now);
+        osc.stop(now+.45);
+    }
+
+    if(type==="glitch"){
+        const osc=audio.createOscillator();
+        const gain=audio.createGain();
+        osc.type="square";
+        osc.frequency.setValueAtTime(70+Math.random()*300,now);
+        gain.gain.setValueAtTime(.0001,now);
+        gain.gain.exponentialRampToValueAtTime(.08,now+.01);
+        gain.gain.exponentialRampToValueAtTime(.0001,now+.18);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now);
+        osc.stop(now+.2);
+    }
+
+    if(type==="click"){
+        const osc=audio.createOscillator();
+        const gain=audio.createGain();
+        osc.type="square";
+        osc.frequency.setValueAtTime(700,now);
+        gain.gain.setValueAtTime(.0001,now);
+        gain.gain.exponentialRampToValueAtTime(.09,now+.005);
+        gain.gain.exponentialRampToValueAtTime(.0001,now+.06);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now);
+        osc.stop(now+.07);
+    }
+
+    if(type==="success"){
+        [523,659,784].forEach((freq,i)=>{
+            const osc=audio.createOscillator();
+            const gain=audio.createGain();
+            const t=now+i*.09;
+            osc.type="sine";
+            osc.frequency.setValueAtTime(freq,t);
+            gain.gain.setValueAtTime(.0001,t);
+            gain.gain.exponentialRampToValueAtTime(.10,t+.015);
+            gain.gain.exponentialRampToValueAtTime(.0001,t+.22);
+            osc.connect(gain);
+            gain.connect(audio.destination);
+            osc.start(t);
+            osc.stop(t+.24);
+        });
+    }
+
+    if(type==="danger"){
+        const osc=audio.createOscillator();
+        const gain=audio.createGain();
+        osc.type="sawtooth";
+        osc.frequency.setValueAtTime(180,now);
+        osc.frequency.exponentialRampToValueAtTime(45,now+.8);
+        gain.gain.setValueAtTime(.0001,now);
+        gain.gain.exponentialRampToValueAtTime(.18,now+.04);
+        gain.gain.exponentialRampToValueAtTime(.0001,now+.85);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now);
+        osc.stop(now+.9);
+    }
+}
+
+
+/* =========================================================
+   MIEMBROS
+========================================================= */
+
+function createMembers(){
+
+    members.innerHTML="";
+
+    people.forEach((person,index)=>{
+
+        const div=
+            document.createElement("div");
+
+        div.className="member";
+
+        div.id=
+            "member-"+index;
+
+        div.innerHTML=`
+            <span>${person.avatar}</span>
+            <span>${person.name}</span>
+        `;
+
+        members.appendChild(div);
+
+    });
+
+}
+
+
+/* =========================================================
+   CARGAR PERSONA
+========================================================= */
+
+function loadPerson(){
+
+    investigated=false;
+
+    const person=
+        people[current];
+
+    avatar.textContent=
+        person.avatar;
+
+    nameEl.textContent=
+        person.name;
+
+    tag.textContent=
+        person.tag;
+
+    messageText.textContent=
+        person.message;
+
+    clues.innerHTML="";
+
+    person.clues.forEach(text=>{
+
+        const div=
+            document.createElement("div");
+
+        div.className="clue";
+
+        div.textContent=
+            "◈ "+text;
+
+        clues.appendChild(div);
+
+    });
+
+
+    progress.style.width=
+        (
+            current /
+            people.length *
+            100
+        )+"%";
+
+
+    counter.textContent=
+        `${current+1} / ${people.length}`;
+
+
+    document
+        .querySelectorAll(".member")
+        .forEach(m=>{
+            m.classList.remove("active");
+        });
+
+
+    const active=
+        $("member-"+current);
+
+    if(active){
+        active.classList.add("active");
+    }
+
+
+    if(current>=5){
+
+        $("status").textContent=
+            "Algo está cambiando.";
+
+    }
+
+    if(current>=9){
+
+        $("status").textContent=
+            "El servidor presenta anomalías.";
+
+    }
+
+    if(current>=12){
+
+        $("status").textContent=
+            "NO CONFÍES EN EL SERVIDOR.";
+
+    }
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+$("startButton").onclick=()=>{
+
+    initAudio();
+
+    if(audio.state==="suspended"){
+        audio.resume();
+    }
+
+    start.classList.add("hidden");
+
+    game.classList.remove("hidden");
+
+    createMembers();
+
+    loadPerson();
+
+    startTerror();
+
+    horrorSound("low");
+
+};
+
+
+/* =========================================================
+   DECISIÓN
+========================================================= */
+
+$("accept").onclick=()=>{
+
+    decide(true);
+
+};
+
+$("block").onclick=()=>{
+
+    decide(false);
+
+};
+
+
+function decide(accepted){
+
+    const person=
+        people[current];
+
+    const isCorrect=
+        person.safe===accepted;
+
+    if(isCorrect){
+
+        correct++;
+
+        $("modalIcon").textContent="✓";
+
+        $("modalTitle").textContent=
+            "DECISIÓN CORRECTA";
+
+        $("modalText").textContent=
+            person.reason;
+
+        horrorSound("success");
+
+    }else{
+
+        risk+=10;
+
+        $("modalIcon").textContent="⚠";
+
+        $("modalTitle").textContent=
+            "TE EQUIVOCASTE";
+
+        $("modalText").textContent=
+            person.reason;
+
+        horrorSound("danger");
+
+        setTimeout(()=>{
+            terrorEvent("mistake");
+        },300);
+
+    }
+
+    $("correctScore").textContent=
+        correct;
+
+    $("riskScore").textContent=
+        risk+"%";
+
+    modal.classList.remove("hidden");
+
+}
+
+
+/* =========================================================
+   INVESTIGAR
+========================================================= */
+
+$("investigate").onclick=()=>{
+
+    if(investigated)return;
+
+    investigated=true;
+
+    const person=
+        people[current];
+
+    const clue=
+        document.createElement("div");
+
+    clue.className=
+        "clue warning";
+
+    clue.textContent=
+        person.safe
+        ?
+        "✓ No se detectaron solicitudes peligrosas."
+        :
+        "⚠ Se detectaron patrones sospechosos.";
+
+    clues.appendChild(clue);
+
+    $("investigate").textContent=
+        "✓ INVESTIGADO";
+
+    horrorSound("glitch");
+
+};
+
+
+/* =========================================================
+   SIGUIENTE
+========================================================= */
+
+$("next").onclick=()=>{
+
+    modal.classList.add("hidden");
+
+    current++;
+
+    if(current>=people.length){
+
+        finish();
+
+    }else{
+
+        loadPerson();
+
+    }
+
+};
+
+
+/* =========================================================
+   TEXTOS DE TERROR
+========================================================= */
+
+const terrorMessages=[
+
+"NO LO ACEPTES",
+
+"NO ESTÁ SOLO",
+
+"CIERRA LA SESIÓN",
+
+"¿QUIÉN ES EL USUARIO 16?",
+
+"NO RESPONDAS",
+
+"TE ESTÁ MIRANDO",
+
+"ÉL SABE TU NOMBRE",
+
+"NO CONFÍES EN NADIE",
+
+"ESA PERSONA NO EXISTE",
+
+"NO HAY 15 PERSONAS",
+
+"TE VIMOS",
+
+"NO DEBERÍAS ESTAR AQUÍ",
+
+"PLAYER_01",
+
+"NO ABRAS EL MENSAJE",
+
+"NO MIRES ATRÁS",
+
+"¿POR QUÉ SIGUES JUGANDO?",
+
+"ERROR",
+
+"CONEXIÓN LOCAL DETECTADA",
+
+"ÉL ESTÁ AQUÍ",
+
+"NO ES UN JUEGO"
+
+];
+
+
+const faces=[
+
+"👁️",
+"👁️‍🗨️",
+"😨",
+"☠️",
+"👹",
+"🫥",
+"😵",
+"👁️👁️"
+
+];
+
+
+/* =========================================================
+   FLASH
+========================================================= */
+
+function doFlash(color="white"){
+
+    horrorSound(color==="red" ? "danger" : "click");
+
+    flash.className="";
+
+    if(color==="red")
+        flash.classList.add("red");
+
+    if(color==="cyan")
+        flash.classList.add("cyan");
+
+    void flash.offsetWidth;
+
+    flash.classList.add("active");
+
+}
+
+
+/* =========================================================
+   TEMBLOR
+========================================================= */
+
+function shake(){
+
+    document.body.classList.remove("shake");
+
+    void document.body.offsetWidth;
+
+    document.body.classList.add("shake");
+
+    setTimeout(()=>{
+
+        document.body.classList.remove("shake");
+
+    },400);
+
+}
+
+
+/* =========================================================
+   TEXTO
+========================================================= */
+
+function scaryText(){
+
+    terrorText.textContent=
+        terrorMessages[
+            Math.floor(
+                Math.random()*
+                terrorMessages.length
+            )
+        ];
+
+    terrorText.classList.remove("show");
+
+    void terrorText.offsetWidth;
+
+    terrorText.classList.add("show");
+
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+function systemError(){
+
+    const errors=[
+
+        "USER_16 // CONNECTION_ESTABLISHED",
+
+        "PLAYER_01 // WATCHED",
+
+        "UNKNOWN_ENTITY // LOCALHOST",
+
+        "ACCOUNT_ACCESS // UNKNOWN",
+
+        "SESSION_01 // COMPROMISED",
+
+        "NOTIFICATION_16 // RECEIVED",
+
+        "SERVER // DOES_NOT_EXIST",
+
+        "USER_NOT_FOUND // USER_PRESENT"
+
+    ];
+
+    $("errorCode").textContent=
+        errors[
+            Math.floor(
+                Math.random()*
+                errors.length
+            )
+        ];
+
+    errorWindow.classList.remove("show");
+
+    void errorWindow.offsetWidth;
+
+    errorWindow.classList.add("show");
+
+    horrorSound("glitch");
+
+}
+
+
+/* =========================================================
+   JUMPSCARE
+========================================================= */
+
+function jump(){
+
+    horrorSound("high");
+    face.textContent=
+        faces[
+            Math.floor(
+                Math.random()*
+                faces.length
+            )
+        ];
+
+    jumpscare.classList.remove("show");
+
+    void jumpscare.offsetWidth;
+
+    jumpscare.classList.add("show");
+
+}
+
+
+/* =========================================================
+   PANTALLA NEGRA
+========================================================= */
+
+function blackout(){
+
+    black.classList.remove("active");
+
+    void black.offsetWidth;
+
+    black.classList.add("active");
+
+    horrorSound("low");
+
+}
+
+
+/* =========================================================
+   GRIETAS
+========================================================= */
+
+function increaseCracks(){
+
+    const amount=
+        Math.min(
+            6,
+            Math.floor(
+                current/2
+            )
+        );
+
+    const elements=
+        cracks.querySelectorAll(".crack");
+
+    elements.forEach(
+        (element,index)=>{
+
+            if(index<amount){
+
+                element.style.opacity="1";
+
+            }
+
+        }
+    );
+
+    cracks.style.opacity=
+        amount>0 ? "1":"0";
+
+}
+
+
+/* =========================================================
+   GLITCH STRIPS
+========================================================= */
+
+function strips(){
+
+    for(
+        let i=0;
+        i<5+current;
+        i++
+    ){
+
+        const strip=
+            document.createElement("div");
+
+        strip.className=
+            "glitch-strip";
+
+        strip.style.top=
+            Math.random()*100+"%";
+
+        strip.style.width=
+            Math.random()*80+"%";
+
+        horror.appendChild(strip);
+
+        setTimeout(()=>{
+
+            strip.classList.add("show");
+
+        },Math.random()*200);
+
+        setTimeout(()=>{
+
+            strip.remove();
+
+        },500);
+
+    }
+
+}
+
+
+/* =========================================================
+   CORROMPER MIEMBROS
+========================================================= */
+
+function corruptMember(){
+
+    const all=
+        document.querySelectorAll(".member");
+
+    if(!all.length)return;
+
+    const random=
+        all[
+            Math.floor(
+                Math.random()*all.length
+            )
+        ];
+
+    random.classList.add("corrupted");
+
+    setTimeout(()=>{
+
+        random.classList.remove(
+            "corrupted"
+        );
+
+    },800);
+
+}
+
+
+/* =========================================================
+   EVENTO DE TERROR
+========================================================= */
+
+function terrorEvent(reason="normal"){
+
+    if(game.classList.contains("hidden"))
+        return;
+
+
+    /*
+       NIVEL 0-4
+       Suspenso
+    */
+
+    if(current<5){
+
+        if(Math.random()>.25)
+            shake();
+
+        if(Math.random()>.35)
+            strips();
+
+        if(Math.random()>.45)
+            doFlash("white");
+
+    }
+
+
+    /*
+       NIVEL 5-9
+       Terror
+    */
+
+    else if(current<10){
+
+        shake();
+
+        strips();
+
+        scaryText();
+
+        if(Math.random()>.35)
+            systemError();
+
+        if(Math.random()>.45)
+            doFlash("red");
+
+        corruptMember();
+
+    }
+
+
+    /*
+       NIVEL 10-14
+       CAOS
+    */
+
+    else{
+
+        shake();
+
+        strips();
+
+        scaryText();
+
+        increaseCracks();
+
+        doFlash("red");
+
+        corruptMember();
+
+        if(Math.random()>.35)
+            systemError();
+
+        if(Math.random()>.40)
+            blackout();
+
+        if(Math.random()>.45)
+            jump();
+
+    }
+
+
+    /*
+       Si el jugador se equivoca,
+       aumentamos brutalmente el evento.
+    */
+
+    if(reason==="mistake"){
+
+        setTimeout(()=>{
+            shake();
+            doFlash("red");
+        },150);
+
+        setTimeout(()=>{
+            scaryText();
+        },300);
+
+        if(current>=7){
+
+            setTimeout(()=>{
+                jump();
+            },500);
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   CICLO DE HORROR
+========================================================= */
+
+let timer=null;
+
+function startTerror(){
+
+    clearTimeout(timer);
+
+
+    function schedule(){
+
+        /*
+           Los eventos aparecen aproximadamente
+           cada 1, 3, 5 o 6 segundos.
+
+           El intervalo cambia para que el jugador
+           no pueda predecir exactamente cuándo ocurre.
+        */
+
+        const intervals=[
+            1000,
+            3000,
+            5000,
+            6000
+        ];
+
+        let delay=
+            intervals[
+                Math.floor(
+                    Math.random()*
+                    intervals.length
+                )
+            ];
+
+        /*
+           Conforme avanza el juego,
+           reducimos ligeramente el tiempo.
+        */
+
+        if(current>=5){
+
+            delay=
+                Math.max(
+                    1200,
+                    delay-700
+                );
+
+        }
+
+        if(current>=10){
+
+            delay=
+                Math.max(
+                    900,
+                    delay-900
+                );
+
+        }
+
+
+        timer=setTimeout(()=>{
+
+            terrorEvent();
+
+            schedule();
+
+        },delay);
+
+    }
+
+    schedule();
+
+}
+
+
+/* =========================================================
+   FINAL
+========================================================= */
+
+function finish(){
+
+    clearTimeout(timer);
+
+    game.classList.add("hidden");
+
+    ending.classList.remove("hidden");
+
+    $("finalScore").textContent=
+        `${correct} / 15`;
+
+
+    if(correct>=9){
+        SafeMindProgress.complete(2, 5);
+    }
+
+    if(correct>=13){
+
+        $("endingIcon").textContent=
+            "🛡️";
+
+        $("endingTitle").textContent=
+            "SOBREVIVISTE";
+
+        $("endingText").textContent=
+            "Detectaste casi todas las amenazas. Pero el servidor registró una conexión adicional durante la partida.";
+
+    }
+
+    else if(correct>=9){
+
+        $("endingIcon").textContent=
+            "🔐";
+
+        $("endingTitle").textContent=
+            "CUENTA EN RIESGO";
+
+        $("endingText").textContent=
+            "Sobreviviste. Sin embargo, algunas de tus decisiones permitieron que algo entrara en la sesión.";
+
+    }
+
+    else{
+
+        $("endingIcon").textContent=
+            "☠️";
+
+        $("endingTitle").textContent=
+            "TE ENCONTRARON";
+
+        $("endingText").textContent=
+            "Demasiadas decisiones fueron incorrectas. La última notificación no pertenecía a ninguna de las 15 personas.";
+
+    }
+
+
+    /*
+       FINAL LENTO
+    */
+
+    setTimeout(()=>{
+
+        document.body.classList.add(
+            "shake"
+        );
+
+        scaryText();
+
+        setTimeout(()=>{
+
+            jump();
+
+        },700);
+
+    },1800);
+
+}
+
+
+/* =========================================================
+   REINICIAR
+========================================================= */
+
+$("restart").onclick=()=>{
+
+    location.reload();
+
+};
+
+</script>
+
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+
+<a href="Modulo_2.html" class="btn-back-module">&larr; REGRESAR</a>
+</html>

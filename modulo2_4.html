@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYBER SENTINEL // Terminal de Defensa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0a0e17;
+    --bg-panel:#0f1522;
+    --grid-line:#1c2740;
+    --cyan:#4cc9f0;
+    --amber:#ffb703;
+    --threat:#ff4d6d;
+    --safe:#3ddc97;
+    --text-hi:#e8edf7;
+    --text-mid:#8a96b3;
+    --font-display:'Chakra Petch', sans-serif;
+    --font-mono:'Space Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:var(--bg-deep);
+    color:var(--text-hi);
+    font-family:var(--font-mono);
+    overflow:hidden;
+  }
+
+  /* ambient hex/grid backdrop */
+  .backdrop{
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:38px 38px;
+    background-position:center;
+    opacity:0.35;
+    mask-image:radial-gradient(ellipse at center, black 0%, transparent 75%);
+    pointer-events:none;
+  }
+
+  .scanline{
+    position:fixed; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity:0.5; filter:blur(0.5px);
+    animation:sweep 6s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes sweep{
+    0%{ top:-2px; }
+    100%{ top:100%; }
+  }
+
+  .stage{
+    position:relative;
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+
+  .console{
+    position:relative;
+    width:min(720px, 96vw);
+    background:linear-gradient(180deg, var(--bg-panel), #0b1120);
+    border:1px solid #24304c;
+    border-radius:10px;
+    box-shadow:0 0 0 1px rgba(76,201,240,0.06), 0 30px 80px -30px rgba(0,0,0,0.8), 0 0 60px -20px rgba(76,201,240,0.15);
+    overflow:hidden;
+  }
+
+  .console::before{
+    content:'';
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+  }
+
+  .titlebar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 18px;
+    border-bottom:1px solid #1c2740;
+    font-family:var(--font-display);
+    letter-spacing:1px;
+  }
+  .titlebar .brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight:700; font-size:14px; color:var(--cyan);
+  }
+  .brand .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--safe);
+    box-shadow:0 0 8px var(--safe);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+  .stats{
+    display:flex; gap:18px;
+    font-size:12px; color:var(--text-mid);
+  }
+  .stats b{ color:var(--text-hi); font-family:var(--font-mono); }
+
+  .btn-back-module{
+    position:fixed;
+    top:18px;
+    left:18px;
+    z-index:20;
+    padding:9px 14px;
+    border:1px solid var(--cyan);
+    border-radius:6px;
+    background:rgba(10,14,23,0.92);
+    color:var(--cyan);
+    font-family:var(--font-mono);
+    font-size:12px;
+    font-weight:700;
+    text-decoration:none;
+    transition:background .2s, color .2s, box-shadow .2s;
+  }
+  .btn-back-module:hover{
+    background:var(--cyan);
+    color:var(--bg-deep);
+    box-shadow:0 0 16px rgba(76,201,240,0.5);
+  }
+
+  .screen{
+    position:relative;
+    min-height:420px;
+    padding:22px 22px 18px;
+  }
+
+  /* ---------- START / GAMEOVER OVERLAYS ---------- */
+  .overlay{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:30px;
+    background:radial-gradient(circle at 50% 30%, rgba(76,201,240,0.06), transparent 60%);
+    z-index:5;
+  }
+  .overlay h1{
+    font-family:var(--font-display);
+    font-size:clamp(24px,5vw,34px);
+    margin:0 0 6px;
+    color:var(--text-hi);
+    letter-spacing:0.5px;
+  }
+  .overlay h1 span{ color:var(--cyan); }
+  .overlay p{
+    color:var(--text-mid); font-size:13px; line-height:1.7;
+    max-width:440px; margin:0 0 22px;
+  }
+  .overlay .rules{
+    display:flex; gap:14px; margin-bottom:24px; flex-wrap:wrap; justify-content:center;
+  }
+  .rule-chip{
+    border:1px solid #24304c; border-radius:6px;
+    padding:8px 12px; font-size:11px; color:var(--text-mid);
+    display:flex; align-items:center; gap:8px;
+  }
+  .rule-chip b{ color:var(--text-hi); }
+  .swatch{ width:10px; height:10px; border-radius:2px; }
+
+  .btn{
+    font-family:var(--font-display); font-weight:600; letter-spacing:0.5px;
+    font-size:14px; padding:12px 26px; border-radius:6px; cursor:pointer;
+    border:1px solid transparent; transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{ transform:scale(0.96); }
+  .btn-primary{
+    background:var(--cyan); color:#04121c; border:none;
+    box-shadow:0 0 24px -6px rgba(76,201,240,0.7);
+  }
+  .btn-primary:hover{ box-shadow:0 0 30px -4px rgba(76,201,240,0.9); }
+
+  .hidden{ display:none !important; }
+
+  /* ---------- GAME AREA ---------- */
+  .hud{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:16px; font-size:12px; color:var(--text-mid);
+  }
+  .lives{ display:flex; gap:6px; }
+  .life{ width:9px; height:9px; border-radius:50%; background:var(--threat); box-shadow:0 0 6px var(--threat); }
+  .life.lost{ background:#232c40; box-shadow:none; }
+
+  .timerbar{
+    height:4px; width:100%; background:#141c2e; border-radius:2px; overflow:hidden; margin-bottom:22px;
+  }
+  .timerfill{
+    height:100%; width:100%; background:linear-gradient(90deg,var(--cyan),var(--safe));
+    transform-origin:left; transition:transform linear, background-color .3s;
+  }
+
+  .track{
+    position:relative;
+    height:210px;
+    border:1px solid #1c2740;
+    border-radius:8px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(76,201,240,0.05), transparent 40%),
+      #0b1120;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:20px;
+  }
+  .packet{
+    width:min(420px, 88%);
+    border:1px solid #2c3a5c;
+    background:#101a2e;
+    border-radius:8px;
+    padding:16px 18px;
+    text-align:left;
+    animation:drop .35s ease;
+  }
+  @keyframes drop{
+    from{ transform:translateY(-14px); opacity:0; }
+    to{ transform:translateY(0); opacity:1; }
+  }
+  .packet .tag{
+    font-family:var(--font-display); font-size:10px; letter-spacing:1.5px;
+    color:var(--amber); text-transform:uppercase; margin-bottom:8px; display:block;
+  }
+  .packet .from{
+    font-size:11px; color:var(--text-mid); margin-bottom:10px;
+  }
+  .packet .from b{ color:var(--text-hi); }
+  .packet .body{
+    font-size:13px; line-height:1.6; color:var(--text-hi);
+  }
+
+  .flash-safe .packet{ border-color:var(--safe); box-shadow:0 0 0 1px rgba(61,220,151,0.2); }
+  .flash-threat .packet{ border-color:var(--threat); box-shadow:0 0 0 1px rgba(255,77,109,0.2); }
+
+  .verdict-badge{
+    position:absolute; top:10px; right:14px;
+    font-family:var(--font-display); font-size:11px; font-weight:700;
+    padding:5px 10px; border-radius:4px; letter-spacing:1px;
+    opacity:0; transition:opacity .15s;
+  }
+  .verdict-badge.show{ opacity:1; }
+  .verdict-badge.correct{ color:var(--safe); border:1px solid var(--safe); background:rgba(61,220,151,0.08); }
+  .verdict-badge.wrong{ color:var(--threat); border:1px solid var(--threat); background:rgba(255,77,109,0.08); }
+
+  .controls{
+    display:flex; gap:14px;
+  }
+  .decision-btn{
+    flex:1;
+    font-family:var(--font-display); font-weight:700; letter-spacing:1px; font-size:14px;
+    padding:16px 10px; border-radius:8px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    border:1px solid; background:transparent; transition:transform .1s ease, background .15s;
+  }
+  .decision-btn small{ font-family:var(--font-mono); font-weight:400; letter-spacing:0; font-size:10px; opacity:0.7; }
+  .decision-btn:active{ transform:scale(0.97); }
+  .btn-block{ color:var(--threat); border-color:var(--threat); }
+  .btn-block:hover{ background:rgba(255,77,109,0.08); }
+  .btn-allow{ color:var(--safe); border-color:var(--safe); }
+  .btn-allow:hover{ background:rgba(61,220,151,0.08); }
+
+  .footnote{
+    text-align:center; margin-top:14px; font-size:10px; color:#4a5578; letter-spacing:0.5px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scanline, .brand .dot, .packet{ animation:none !important; }
+  }
+
+  @media (max-width:480px){
+    .screen{ padding:16px; }
+    .track{ height:230px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="backdrop"></div>
+<div class="scanline"></div>
+
+<div class="stage">
+  <div class="console">
+    <div class="titlebar">
+      <div class="brand"><span class="dot"></span> CYBER SENTINEL</div>
+      <div class="stats">
+        <div>SCORE <b id="scoreVal">0</b></div>
+        <div>NIVEL <b id="levelVal">1</b></div>
+      </div>
+    </div>
+
+    <div class="screen">
+
+      <!-- START OVERLAY -->
+      <div class="overlay" id="startOverlay">
+        <h1>CYBER <span>SENTINEL</span></h1>
+        <p>Eres el analista de seguridad de turno. Paquetes de red llegan a tu terminal uno por uno. Decide rápido: ¿es una amenaza que hay que <b style="color:var(--threat)">BLOQUEAR</b>, o tráfico legítimo que debes <b style="color:var(--safe)">PERMITIR</b>?</p>
+        <div class="rules">
+          <div class="rule-chip"><span class="swatch" style="background:var(--threat)"></span>3 vidas — cada error te cuesta una</div>
+          <div class="rule-chip"><span class="swatch" style="background:var(--amber)"></span>El tiempo se acorta con cada nivel</div>
+          <div class="rule-chip"><span class="swatch" style="background:var(--cyan)"></span>← / → o botones para decidir</div>
+        </div>
+        <button class="btn btn-primary" id="startBtn">INICIAR TURNO</button>
+      </div>
+
+      <!-- GAME OVER OVERLAY -->
+      <div class="overlay hidden" id="overOverlay">
+        <h1>TURNO <span id="overWord">FINALIZADO</span></h1>
+        <p id="overText">Tu terminal quedó comprometida. Revisa el informe final.</p>
+        <div class="rules">
+          <div class="rule-chip">PUNTAJE FINAL <b id="finalScore" style="margin-left:6px">0</b></div>
+          <div class="rule-chip">NIVEL ALCANZADO <b id="finalLevel" style="margin-left:6px">1</b></div>
+        </div>
+        <button class="btn btn-primary" id="retryBtn">REINICIAR</button>
+      </div>
+
+      <!-- GAME AREA -->
+      <div id="gameArea" class="hidden">
+        <div class="hud">
+          <div class="lives" id="livesRow"></div>
+          <div id="streak">RACHA: 0</div>
+        </div>
+        <div class="timerbar"><div class="timerfill" id="timerFill"></div></div>
+
+        <div class="track" id="track">
+          <div class="verdict-badge" id="verdictBadge"></div>
+          <div class="packet" id="packetCard">
+            <span class="tag" id="packetTag">ENTRANTE</span>
+            <div class="from">DE: <b id="packetFrom">—</b></div>
+            <div class="body" id="packetBody">—</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="decision-btn btn-block" id="blockBtn">⛔ BLOQUEAR<small>tecla ←</small></button>
+          <button class="decision-btn btn-allow" id="allowBtn">✅ PERMITIR<small>tecla →</small></button>
+        </div>
+
+        <div class="footnote">CADA DECISIÓN QUEDA REGISTRADA EN EL LOG DE SEGURIDAD</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const PACKETS = [
+    { tag:"CORREO", from:"soporte@banconacional-verificacion.com", body:"Su cuenta será suspendida en 24h. Confirme sus datos haciendo clic en el enlace adjunto.", threat:true },
+    { tag:"CORREO", from:"facturacion@proveedor-real.com", body:"Adjuntamos la factura #4521 del mes de julio correspondiente al contrato vigente.", threat:false },
+    { tag:"DESCARGA", from:"actualizador_flash_v9.exe", body:"Archivo ejecutable descargado desde un anuncio emergente que promete 'actualizar tu reproductor'.", threat:true },
+    { tag:"ACTUALIZACIÓN", from:"Centro de actualizaciones del sistema", body:"Parche de seguridad oficial firmado digitalmente, descargado desde el sitio del fabricante.", threat:false },
+    { tag:"SMS", from:"+000-000-2291", body:"Tu paquete no pudo entregarse. Reprograma el envío aquí: bit.ly/entrega-urgente", threat:true },
+    { tag:"RED WIFI", from:"\"Aeropuerto_WiFi_Gratis_VIP\"", body:"Red abierta sin contraseña que solicita iniciar sesión con tu cuenta de correo para 'verificar tu identidad'.", threat:true },
+    { tag:"MENSAJE", from:"IT-Soporte (canal interno verificado)", body:"Recordatorio: la ventana de mantenimiento programada será el sábado de 2am a 4am.", threat:false },
+    { tag:"USB", from:"Memoria encontrada en el estacionamiento", body:"Etiquetada como 'Fotos de la fiesta'. Alguien la dejó en tu escritorio con una nota anónima.", threat:true },
+    { tag:"LOGIN", from:"Portal interno de RRHH", body:"Solicitud de inicio de sesión con autenticación de dos factores desde tu dispositivo habitual.", threat:false },
+    { tag:"CORREO", from:"ceo@tuempresa.com (dominio: tuemplresa.com)", body:"Necesito que compres tarjetas de regalo urgente para un cliente, es confidencial, no llames por teléfono.", threat:true },
+    { tag:"ALERTA", from:"Antivirus corporativo", body:"Escaneo semanal completado: 0 amenazas detectadas en los últimos 7 días.", threat:false },
+    { tag:"ENLACE", from:"Compañero de equipo en el chat", body:"Comparte un documento de Google Drive con el título esperado, enviado desde su cuenta habitual.", threat:false },
+    { tag:"CORREO", from:"premios@sorteo-internacional.net", body:"¡Felicidades! Ganaste $50,000. Envía tus datos bancarios y una copia de tu identificación para reclamar.", threat:true },
+    { tag:"APP", from:"Solicitud de permiso", body:"Una app de linterna pide acceso a tus contactos, ubicación, micrófono y cámara.", threat:true },
+    { tag:"FACTURA", from:"proveedor-internet@ispconocido.com", body:"Recibo mensual con el mismo formato de siempre, monto habitual, sin enlaces sospechosos.", threat:false },
+    { tag:"CORREO", from:"noreply@tu-servicio-streaming.com", body:"Tu método de pago fue actualizado correctamente. Si no reconoces este cambio, contáctanos desde la app oficial.", threat:false },
+    { tag:"MENSAJE", from:"\"Soporte Microsoft\" (llamada no solicitada)", body:"Dicen haber detectado virus en tu PC y piden acceso remoto inmediato para 'solucionarlo'.", threat:true },
+    { tag:"CÓDIGO 2FA", from:"SMS no solicitado", body:"Tu código es 837291. Alguien más está intentando iniciar sesión en tu cuenta ahora mismo.", threat:true },
+  ];
+
+  let score=0, level=1, lives=3, streak=0, timeLeft=1, timerId=null, currentPacket=null, playing=false;
+  const BASE_TIME = 6000;
+
+  const el = id => document.getElementById(id);
+  const startOverlay = el('startOverlay');
+  const overOverlay = el('overOverlay');
+  const gameArea = el('gameArea');
+  const track = el('track');
+  const timerFill = el('timerFill');
+  const livesRow = el('livesRow');
+  const verdictBadge = el('verdictBadge');
+
+  function renderLives(){
+    livesRow.innerHTML = '';
+    for(let i=0;i<3;i++){
+      const d = document.createElement('div');
+      d.className = 'life' + (i < lives ? '' : ' lost');
+      livesRow.appendChild(d);
+    }
+  }
+
+  function pickPacket(){
+    const idx = Math.floor(Math.random()*PACKETS.length);
+    return PACKETS[idx];
+  }
+
+  function levelDuration(){
+    return Math.max(2200, BASE_TIME - (level-1)*450);
+  }
+
+  function nextPacket(){
+    track.classList.remove('flash-safe','flash-threat');
+    verdictBadge.classList.remove('show','correct','wrong');
+    currentPacket = pickPacket();
+    el('packetTag').textContent = currentPacket.tag;
+    el('packetFrom').textContent = currentPacket.from;
+    el('packetBody').textContent = currentPacket.body;
+    const card = el('packetCard');
+    card.style.animation = 'none';
+    void card.offsetWidth;
+    card.style.animation = '';
+
+    const dur = levelDuration();
+    timerFill.style.transition = 'none';
+    timerFill.style.transform = 'scaleX(1)';
+    timerFill.style.background = 'linear-gradient(90deg,var(--cyan),var(--safe))';
+    void timerFill.offsetWidth;
+    timerFill.style.transition = `transform ${dur}ms linear, background-color .3s`;
+    requestAnimationFrame(()=>{
+      timerFill.style.transform = 'scaleX(0)';
+    });
+
+    clearTimeout(timerId);
+    timerId = setTimeout(()=> decide(null), dur);
+  }
+
+  function decide(userSaysThreat){
+    if(!playing) return;
+    clearTimeout(timerId);
+    const timedOut = userSaysThreat === null;
+    const correct = !timedOut && (userSaysThreat === currentPacket.threat);
+
+    verdictBadge.textContent = timedOut ? 'SIN RESPUESTA' : (correct ? 'CORRECTO' : 'INCORRECTO');
+    verdictBadge.classList.add('show', correct ? 'correct' : 'wrong');
+    track.classList.add(currentPacket.threat ? 'flash-threat' : 'flash-safe');
+
+    if(correct){
+      score += 10 + streak*2;
+      streak += 1;
+      if(streak > 0 && streak % 4 === 0){ level += 1; }
+    } else {
+      streak = 0;
+      lives -= 1;
+    }
+
+    el('scoreVal').textContent = score;
+    el('levelVal').textContent = level;
+    el('streak').textContent = 'RACHA: ' + streak;
+    renderLives();
+
+    if(lives <= 0){
+      setTimeout(endGame, 550);
+      return;
+    }
+    setTimeout(nextPacket, 550);
+  }
+
+  function startGame(){
+    score=0; level=1; lives=3; streak=0; playing=true;
+    el('scoreVal').textContent = 0;
+    el('levelVal').textContent = 1;
+    el('streak').textContent = 'RACHA: 0';
+    renderLives();
+    startOverlay.classList.add('hidden');
+    overOverlay.classList.add('hidden');
+    gameArea.classList.remove('hidden');
+    nextPacket();
+  }
+
+  function endGame(){
+    playing = false;
+    clearTimeout(timerId);
+    gameArea.classList.add('hidden');
+    el('finalScore').textContent = score;
+    el('finalLevel').textContent = level;
+    if (score >= 80) SafeMindProgress.complete(2, 4);
+    overOverlay.classList.remove('hidden');
+  }
+
+  el('startBtn').addEventListener('click', startGame);
+  el('retryBtn').addEventListener('click', startGame);
+  el('blockBtn').addEventListener('click', ()=> decide(true));
+  el('allowBtn').addEventListener('click', ()=> decide(false));
+
+  document.addEventListener('keydown', (e)=>{
+    if(!playing) return;
+    if(e.key === 'ArrowLeft') decide(true);
+    if(e.key === 'ArrowRight') decide(false);
+  });
+})();
+</script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+
+<a href="Modulo_2.html" class="btn-back-module">&larr; REGRESAR</a>
+</html>

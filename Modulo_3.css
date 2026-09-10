@@ -1,0 +1,329 @@
+/* =========================================================
+   SafeMind · Modo Kids — Modulo_2.css
+   ========================================================= */
+
+:root{
+  --bg-black:        #030417;
+  --bg-black-2:      #05061c;
+  --header-start:    #00000f;
+  --header-mid:      #170a55;
+  --header-end:      #330dc4;
+  --purple-card:     #2d10b0;
+  --purple-card-2:   #3a15d6;
+  --purple-deco:     #6a2ff2;
+  --cyan:            #00d6e8;
+  --cyan-soft:       #35e6f2;
+  --cyan-glow:       rgba(0, 214, 232, 0.55);
+  --white:           #ffffff;
+  --sun-yellow:      #ffe98a;
+  --font-main: 'Poppins', 'Segoe UI', Arial, sans-serif;
+
+  --header-h: clamp(78px, 12vw, 110px);
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html, body{ height:100%; }
+
+body{
+  font-family: var(--font-main);
+  background: radial-gradient(ellipse at 50% 0%, #060826 0%, var(--bg-black) 55%, #000000 100%);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background .5s ease, color .5s ease;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+.app-header{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: var(--header-h);
+  padding: 14px clamp(16px, 4vw, 40px);
+  background: linear-gradient(92deg,
+              var(--header-start) 0%,
+              var(--header-mid) 62%,
+              var(--header-end) 100%);
+  border-bottom: 2px solid var(--cyan);
+  box-shadow: 0 0 18px 0 var(--cyan-glow), 0 2px 30px rgba(0,0,0,.55);
+  z-index: 5;
+}
+
+.header-deco{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.header-deco--tr .deco-shape{
+  position: absolute;
+  top: -60px;
+  border-radius: 18px;
+  transform: rotate(28deg);
+}
+.header-deco--tr .shape-1{
+  right: -4%;
+  width: 130px; height: 300px;
+  background: linear-gradient(145deg, var(--purple-deco), var(--cyan));
+  opacity: .95;
+}
+.header-deco--tr .shape-2{
+  right: 10%;
+  width: 70px; height: 300px;
+  background: linear-gradient(160deg, #4a12e0, var(--cyan-soft));
+  opacity: .85;
+}
+.header-deco--tr .shape-3{
+  right: 18%;
+  width: 34px; height: 260px;
+  background: linear-gradient(160deg, #7b2ff7, #21e6f6);
+  opacity: .55;
+}
+
+/* Brand block: logo + title */
+.brand{
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.brand-logo{
+  height: clamp(46px, 7vw, 66px);
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 0 10px rgba(0, 214, 232, .45));
+}
+
+.brand-divider{
+  width: 2px;
+  align-self: stretch;
+  min-height: 34px;
+  background: linear-gradient(180deg, transparent, var(--cyan), transparent);
+  border-radius: 2px;
+}
+
+.brand-title{
+  font-size: clamp(1.25rem, 2.6vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: var(--white);
+  line-height: 1.05;
+}
+.brand-title span{ color: var(--cyan); }
+
+.brand-subtitle{
+  margin-top: 3px;
+  font-size: clamp(.55rem, 1vw, .68rem);
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+/* Center title */
+.header-center{
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.kids-mode-title{
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+}
+
+/* Right: toggle & back button */
+.header-right{
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+/* Botón Regresar */
+.btn-back{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 214, 232, 0.12);
+  border: 1.5px solid var(--cyan);
+  color: var(--cyan-soft);
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-family: var(--font-main);
+  font-size: clamp(.75rem, 1.1vw, .88rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .22s ease;
+}
+
+.btn-back .icon-back{
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.btn-back:hover{
+  background: var(--cyan);
+  color: #030417;
+  box-shadow: 0 0 12px var(--cyan-glow);
+  transform: translateX(-2px);
+}
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+.app-main{
+  position: relative;
+  min-height: calc(100vh - var(--header-h));
+  padding: clamp(40px, 7vw, 76px) clamp(20px, 6vw, 90px);
+  display: flex;
+  align-items: center;
+}
+
+.bg-dots{
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 340px;
+  height: 340px;
+  background-image: radial-gradient(var(--cyan) 1.4px, transparent 1.4px);
+  background-size: 16px 16px;
+  -webkit-mask-image: radial-gradient(circle at 10% 90%, rgba(0,0,0,.55) 0%, transparent 70%);
+          mask-image: radial-gradient(circle at 10% 90%, rgba(0,0,0,.55) 0%, transparent 70%);
+  opacity: .5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-deco--bl{
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 260px;
+  height: 260px;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-deco--bl .deco-shape{
+  position: absolute;
+  border-radius: 22px;
+  transform: rotate(-28deg);
+}
+.bg-deco--bl .shape-a{
+  left: -30px;
+  bottom: 55px;
+  width: 145px; height: 115px;
+  background: linear-gradient(140deg, var(--cyan-soft), #0aa9c9);
+  opacity: .95;
+}
+.bg-deco--bl .shape-b{
+  left: -15px;
+  bottom: -75px;
+  width: 210px; height: 210px;
+  background: linear-gradient(150deg, #5a1fe0, var(--purple-card-2));
+  opacity: .85;
+}
+
+/* =========================================================
+   MODULE CARDS
+   ========================================================= */
+.modules-row{
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(16px, 2.6vw, 28px);
+  width: 100%;
+}
+
+.module-card{
+  flex: 1 1 140px;
+  max-width: 190px;
+  aspect-ratio: 80 / 137;
+  min-height: 150px;
+  background: linear-gradient(160deg, var(--purple-card-2) 0%, var(--purple-card) 60%, #240c8f 100%);
+  border-radius: 18px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 24px rgba(6, 2, 40, .55), inset 0 1px 0 rgba(255,255,255,.06);
+  cursor: pointer;
+  outline: none;
+  transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+}
+
+.module-card:hover,
+.module-card:focus-visible{
+  transform: translateY(-6px);
+  box-shadow: 0 16px 30px rgba(0, 214, 232, .25), 0 10px 24px rgba(6,2,40,.55);
+}
+
+.module-card:active{
+  transform: translateY(-2px) scale(.98);
+}
+
+.module-card.is-selected{
+  filter: brightness(1.12);
+  box-shadow: 0 0 0 2px var(--cyan), 0 16px 30px rgba(0, 214, 232, .3);
+}
+
+.module-number{
+  font-size: clamp(1.8rem, 3.4vw, 2.4rem);
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1;
+}
+
+.module-title{
+  font-size: clamp(.85rem, 1.4vw, 1rem);
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.3;
+}
+
+/* =========================================================
+   LIGHT / "DAY" THEME — toggled via JS (sun side)
+   ========================================================= */
+body.theme-light{
+  background: radial-gradient(ellipse at 50% 0%, #eaf7fb 0%, #dff1f7 55%, #cfeaf3 100%);
+  color: #0c1b2a;
+}
+body.theme-light .app-header{
+  background: linear-gradient(92deg, #08234a 0%, #1740a8 62%, #1fa7d6 100%);
+}
+body.theme-light .kids-mode-title,
+body.theme-light .brand-title{ color: #ffffff; }
+body.theme-light .app-main{ color: #0c1b2a; }
+body.theme-light .module-card{
+  background: linear-gradient(160deg, #2f6fe0 0%, #1c4bc9 60%, #123a9e 100%);
+}
+body.theme-light .bg-dots{ opacity: .35; }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 860px){
+  .app-header{ flex-wrap: wrap; row-gap: 10px; }
+  .header-center{ order: 3; width: 100%; justify-content: flex-start; }
+}
+
+@media (max-width: 560px){
+  .modules-row{ justify-content: center; }
+  .module-card{ flex: 0 0 42%; }
+}

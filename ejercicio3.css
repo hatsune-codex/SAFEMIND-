@@ -1,0 +1,84 @@
+:root {
+    --bg-main: linear-gradient(135deg, #050612 0%, #0d0a20 50%, #1e114d 100%);
+    --bg-nav: transparent;
+    --text-main: #ffffff;
+    --text-muted: #cccccc;
+    --cyan: #00d2ff;
+    --purple: #3b28cc;
+    --chat-bg: #090814;
+    --chat-border: #302385;
+    --bubble-incoming: #1a1a2e;
+    --bubble-outgoing: #3b28cc;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; transition: background 0.3s ease, color 0.3s ease; }
+
+/* Navbar igual a tus otros archivos */
+.navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background-color: var(--bg-nav); }
+.logo-container { display: flex; align-items: center; gap: 15px; }
+.logo-img { height: 50px; width: auto; }
+.logo-text h1 { font-size: 26px; font-weight: 800; }
+.logo-text h1 span { color: var(--cyan); }
+.logo-text p { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
+.separator { width: 100%; height: 1px; background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 100%); box-shadow: 0 0 8px var(--cyan); }
+
+.container { padding: 20px 40px; flex: 1; display: flex; flex-direction: column; }
+.back-link { color: var(--cyan); text-decoration: none; font-weight: 600; font-size: 14px; margin-bottom: 20px; display: inline-block; }
+
+/* ÁREA DE LA HISTORIA (Estilo Teléfono) */
+.story-wrapper {
+    display: flex; justify-content: center; align-items: center; width: 100%; flex: 1;
+}
+
+.phone-screen {
+    width: 100%; max-width: 500px; background: var(--chat-bg); border: 2px solid var(--chat-border);
+    border-radius: 20px; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; height: 600px;
+}
+
+.chat-header {
+    display: flex; align-items: center; padding: 15px 20px; background: rgba(59, 40, 204, 0.2);
+    border-bottom: 1px solid var(--chat-border); gap: 15px;
+}
+.avatar { font-size: 35px; background: #fff; border-radius: 50%; padding: 2px; }
+.contact-info h3 { font-size: 16px; font-weight: 800; margin-bottom: 3px; }
+.contact-info p { font-size: 12px; color: var(--cyan); font-weight: 600; }
+
+.chat-body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+
+.message { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 15px; line-height: 1.4; animation: popIn 0.4s ease forwards; }
+.incoming { background: var(--bubble-incoming); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 5px; }
+.outgoing { background: var(--bubble-outgoing); color: #fff; align-self: flex-end; border-bottom-right-radius: 5px; }
+
+/* Panel de Decisiones */
+.decision-panel { padding: 20px; background: rgba(0,0,0,0.2); border-top: 1px solid var(--chat-border); display: flex; flex-direction: column; gap: 10px; }
+.panel-title { text-align: center; font-size: 14px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+
+.choice-btn {
+    font-size: 14px; padding: 12px; border-radius: 10px; text-transform: none; text-align: left;
+    background: transparent; color: var(--cyan); border: 2px solid var(--cyan); font-weight: 600;
+    cursor: pointer; transition: all 0.2s ease;
+}
+.choice-btn:hover { background: var(--cyan); color: #000; box-shadow: 0 0 15px var(--cyan); }
+
+/* Panel de Consecuencia (El resultado) */
+.outcome-panel {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--chat-bg);
+    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    padding: 30px; z-index: 10; animation: slideUp 0.5s ease forwards;
+}
+.outcome-icon { font-size: 70px; margin-bottom: 20px; animation: bounce 1s infinite alternate; }
+.outcome-panel h2 { font-size: 24px; margin-bottom: 15px; color: var(--cyan); }
+.outcome-panel p { font-size: 16px; line-height: 1.5; margin-bottom: 30px; color: var(--text-muted); }
+
+.hidden { display: none !important; }
+
+/* Animaciones */
+@keyframes popIn { 0% { opacity: 0; transform: translateY(10px) scale(0.9); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes slideUp { 0% { opacity: 0; transform: translateY(100%); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
+
+/* Colores para las consecuencias */
+.outcome-bad h2 { color: #ff4b4b !important; }
+.outcome-good h2 { color: #00d26a !important; }

@@ -1,0 +1,26 @@
+SAFEMIND - VERSION CON PROGRESO SUPABASE
+
+1) Abre supabase-config.js.
+2) Pega tu Project URL en SUPABASE_URL.
+3) Pega tu anon/public key en SUPABASE_ANON_KEY.
+   NO uses la service_role key.
+
+TABLA DE PROGRESO ESPERADA: public.Progreso_niveles
+Columnas: id, created_at, usuario_id, correo, modulo, nivel, porcentaje, completado, actualizado.
+
+IMPORTANTE: crea la restricción UNIQUE (usuario_id, modulo, nivel).
+SQL:
+ALTER TABLE public."Progreso_niveles"
+ADD CONSTRAINT progreso_usuario_modulo_nivel_unique
+UNIQUE (usuario_id, modulo, nivel);
+
+RLS:
+- SELECT: auth.uid() = usuario_id
+- INSERT WITH CHECK: auth.uid() = usuario_id
+- UPDATE USING y WITH CHECK: auth.uid() = usuario_id
+
+La versión también intenta guardar:
+- registros_acceso: usuario_id, correo, tipo, fecha
+- resultados_master: usuario_id, correo, correctas, incorrectas, total_preguntas, porcentaje, aprobado, fecha
+
+Si esas tablas todavía no existen, el resto de SafeMind sigue funcionando y solo verás un aviso en la consola.

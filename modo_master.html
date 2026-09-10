@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMind - Modo Master</title>
+    <style>
+        :root {
+            --bg-dark: #03050a;
+            --bg-card: rgba(13, 17, 38, 0.7);
+            --border-glow: #00d2ff;
+            --text-main: #ffffff;
+            --text-secondary: #94a3b8;
+            --accent-cyan: #00f2fe;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #03050a 0%, #0d1224 50%, #170b2e 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-container {
+            width: 100%;
+            max-width: 850px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.5));
+        }
+
+        .brand-text h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .brand-text h1 span {
+            color: var(--accent-cyan);
+        }
+
+        .brand-text p {
+            margin: 2px 0 0 0;
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .mode-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .btn-regresar {
+            background: transparent;
+            border: 1.5px solid var(--accent-cyan);
+            color: var(--text-main);
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-regresar:hover {
+            background: rgba(0, 242, 254, 0.1);
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+        }
+
+        .quiz-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            border-radius: 16px;
+            padding: 35px;
+            max-width: 850px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            margin-bottom: 40px;
+        }
+
+        .question-box {
+            margin-bottom: 25px;
+            padding: 22px 20px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            background: linear-gradient(135deg, rgba(9, 13, 29, 0.95), rgba(25, 18, 46, 0.88));
+            box-shadow: 0 10px 24px rgba(14, 18, 34, 0.45);
+            animation: slideInUp 0.55s ease;
+            transform-origin: center top;
+        }
+
+        .question-box:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 18px;
+        }
+
+        .question-box.exit {
+            animation: fallOut 0.6s ease forwards;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(-35px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fallOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(120px) rotateX(50deg) scale(0.92);
+            }
+        }
+
+        .question-title {
+            font-size: 1.08rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #f1f5f9;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 0;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 0.95rem;
+            color: #dbeafe;
+            min-height: 52px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .options label::before {
+            content: "";
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 242, 254, 0.75);
+            background: rgba(0, 242, 254, 0.05);
+            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.15);
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .options label:hover {
+            background: rgba(0, 242, 254, 0.08);
+            border-color: rgba(0, 242, 254, 0.45);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0, 242, 254, 0.12);
+            color: #ffffff;
+        }
+
+        .options input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .options label.selected {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.18), rgba(168, 85, 247, 0.16));
+            border-color: rgba(0, 242, 254, 0.95);
+            box-shadow: 0 0 18px rgba(0, 242, 254, 0.2);
+            color: #ffffff;
+        }
+
+        .options label.selected::before {
+            background: radial-gradient(circle, #00f2fe 0%, #7c3aed 50%, rgba(0, 242, 254, 0.15) 100%);
+            border-color: #a78bfa;
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.7);
+        }
+
+        .quiz-nav {
+            margin-top: 18px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-next:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
+            transform: translateY(-1px);
+        }
+
+        #result-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        #result {
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(13, 17, 38, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        /* DIPLOMA NEÓN FUTURISTA */
+        .diploma-box {
+            background: linear-gradient(145deg, #070b19, #0f172a);
+            color: #ffffff;
+            padding: 45px;
+            border-radius: 16px;
+            border: 2px solid var(--accent-cyan);
+            text-align: center;
+            margin-top: 25px;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.25), inset 0 0 20px rgba(0, 242, 254, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .diploma-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00f2fe, #7c3aed, #00f2fe);
+        }
+
+        .diploma-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.7));
+        }
+
+        .diploma-box h3 {
+            color: var(--accent-cyan);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .diploma-box h2 {
+            color: #ffffff;
+            font-size: 2.2rem;
+            margin: 10px 0 20px 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+        }
+
+        .diploma-box p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin: 10px 0;
+        }
+
+        .diploma-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-cyan);
+            border-bottom: 2px solid rgba(0, 210, 255, 0.4);
+            display: inline-block;
+            padding: 0 30px;
+            margin: 15px 0;
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+        }
+
+        .diploma-desc {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            max-width: 650px;
+            margin: 15px auto;
+            line-height: 1.6;
+        }
+
+        .diploma-footer {
+            margin-top: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #03050a;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .btn-print:hover {
+            opacity: 0.9;
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: #03050a !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #diplomaBox, #diplomaBox * {
+                visibility: visible;
+            }
+            #diplomaBox {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: 2px solid #00f2fe;
+                box-shadow: none;
+            }
+            .btn-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="brand-section">
+            <img src="logo.png" alt="SafeMind Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/55?text=SM'">
+            <div class="brand-text">
+                <h1>Safe<span>Mind</span></h1>
+                <p>Ciberseguridad Educativa</p>
+            </div>
+        </div>
+        <h2 class="mode-title">Modo Master</h2>
+        <a href="index.html" class="btn-regresar">← Regresar</a>
+    </div>
+
+    <div class="quiz-container">
+        <div style="text-align: center; color: var(--text-secondary); margin-bottom: 25px;">
+            Evaluación avanzada de ciberseguridad, ingeniería social y protección de activos digitales (25 Preguntas).<br>
+            <b>Nota:</b> Necesitas al menos 18 aciertos para obtener tu certificación oficial.
+        </div>
+
+        <form id="quizForm">
+            <div id="questionsContainer"></div>
+            <button type="button" class="btn-submit" onclick="calcularResultados()">Evaluar mis conocimientos</button>
+        </form>
+
+        <div id="result-container" class="hidden">
+            <div id="result"></div>
+            
+            <!-- Diploma Estilo Neón / Gamer / Tech -->
+            <div id="diplomaBox" class="diploma-box hidden">
+                <img src="logo.png" alt="Logo SafeMind" class="diploma-logo" onerror="this.src='https://via.placeholder.com/70?text=SM'">
+                <h3>Certificado Oficial de Acreditación</h3>
+                <h2>SafeMind Master</h2>
+                <p>Se otorga el presente reconocimiento a:</p>
+                <div class="diploma-name" id="userNameDisplay">Estudiante Master</div>
+                <div class="diploma-desc">
+                    Por haber completado con éxito la evaluación avanzada de ciberseguridad, validando competencias de nivel experto en la protección contra amenazas digitales, ingeniería social y defensa de activos tecnológicos.
+                </div>
+                <div class="diploma-footer">
+                    <div>Fecha de emisión: <span id="diplomaDate"></span></div>
+                    <div>Plataforma: <b>SafeMind Ciberseguridad</b></div>
+                </div>
+                <button type="button" class="btn-print" onclick="window.print()">Descargar / Imprimir Certificado</button>
+            </div>
+        </div>
+    </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+<script>
+    const preguntas = [
+        { q: "1. ¿Qué es el 'Typosquatting'?", options: ["Un ejercicio físico de postura digital", "Registrar dominios con errores tipográficos comunes para suplantar marcas", "Un método para comprimir archivos pesados", "Una técnica de encriptación de datos"], a: 1 },
+        { q: "2. ¿Cuál es el principal riesgo de usar una red Wi-Fi pública abierta sin VPN?", options: ["Que el internet se vuelva más lento", "Que tu equipo consuma más batería", "Que tus datos de navegación puedan ser interceptados (Ataque Man-in-the-Middle)", "Que se borre el historial automáticamente"], a: 2 },
+        { q: "3. ¿Qué indica el protocolo HTTPS en la barra de direcciones de una página web?", options: ["Que la página es 100% segura contra cualquier estafa", "Que la conexión entre tu navegador y el servidor está cifrada", "Que la empresa dueña del sitio está legalmente registrada", "Que la página no contiene anuncios"], a: 1 },
+        { q: "4. ¿Qué es el 'SIM Swapping'?", options: ["Intercambiar tarjetas SIM con amigos para probar operadores", "El secuestro de tu número telefónico mediante engaños a la compañía móvil para robarte códigos 2FA", "Una técnica para duplicar la memoria interna del celular", "Un virus que quema la tarjeta SIM"], a: 1 },
+        { q: "5. ¿Por qué se consideran inseguros los códigos SMS como método de Autenticación de Doble Factor (2FA)?", options: ["Porque tardan mucho en llegar", "Porque son vulnerables a la intercepción y al SIM Swapping", "Porque las operadoras cobran por recibirlos", "Porque no funcionan en teléfonos modernos"], a: 1 },
+        { q: "6. ¿Qué es el 'Phishing' dirigido a objetivos específicos y de alto perfil?", options: ["Whaling o Spear Phishing", "Smishing básico", "Pharmeding", "Clickjacking"], a: 0 },
+        { q: "7. ¿Qué es una contraseña con 'Hashing' en una base de datos?", options: ["Una contraseña escrita en un bloc de notas secreto", "Una clave transformada matemáticamente en una cadena indescifrable unidireccional", "Una contraseña compartida con múltiples usuarios", "Una clave cifrada que el sistema puede revertir fácilmente a texto plano"], a: 1 },
+        { q: "8. ¿Cuál es la diferencia principal entre Phishing y Vishing?", options: ["El Phishing es por correo/SMS y el Vishing utiliza llamadas telefónicas de voz", "El Vishing solo ocurre en redes sociales", "No hay diferencia, son exactamente lo mismo", "El Phishing es legal y el Vishing no"], a: 0 },
+        { q: "9. ¿Qué son los metadatos EXIF en una fotografía digital?", options: ["Un filtro estético de colores", "Información oculta como fecha, hora y ubicación GPS exacta donde se tomó la foto", "El formato de compresión de la imagen", "La firma digital del fotógrafo profesional"], a: 1 },
+        { q: "10. ¿Qué busca un ataque de 'Ransomware'?", options: ["Robar contraseñas de redes sociales silenciosamente", "Cifrar los archivos de tu equipo y exigir un rescate económico para liberarlos", "Llenar tu disco duro de spam publicitario", "Bloquear temporalmente tu cuenta de correo"], a: 1 },
+        { q: "11. ¿Qué es un ataque de Ingeniería Social?", options: ["Manipular psicológicamente a las personas para que revelen información confidencial", "Un fallo de seguridad en los servidores de Facebook", "Un virus informático que se transmite por Bluetooth", "Un programa para hackear redes sociales automáticamente"], a: 0 },
+        { q: "12. ¿Cuál es el propósito de utilizar un Administrador de Contraseñas?", options: ["Memorizar una sola clave para todas las cuentas", "Almacenar y generar contraseñas únicas y robustas cifradas bajo una contraseña maestra", "Compartir claves de forma segura con familiares", "Acelerar la velocidad de carga de las páginas web"], a: 1 },
+        { q: "13. ¿Qué es el 'Smishing'?", options: ["Estafas mediante mensajes de texto (SMS)", "Un virus que afecta a las pantallas táctiles", "Robo de identidad en redes profesionales como LinkedIn", "Un método de pago electrónico seguro"], a: 0 },
+        { q: "14. ¿Qué es una VPN (Red Privada Virtual)?", options: ["Un antivirus gratuito para computadoras", "Un túnel cifrado que oculta tu dirección IP real y protege tu tráfico web", "Una red social exclusiva para programadores", "Un disco duro en la nube"], a: 1 },
+        { q: "15. ¿Qué significa que un sitio web sufra un ataque de Inyección SQL?", options: ["Que robaron los cables físicos de la base de datos", "Que un atacante logró insertar código malicioso en las consultas de la base de datos a través de los formularios", "Que la página se quedó sin espacio de almacenamiento", "Que el servidor web se apagó por sobrecalentamiento"], a: 1 },
+        { q: "16. ¿Qué es el 'Credential Stuffing'?", options: ["Rellenar formularios automáticamente con datos falsos", "Usar listas de usuarios y contraseñas filtradas en una plataforma para probarlas masivamente en otras", "Crear correos electrónicos falsos por mayor", "Un sistema para recuperar contraseñas perdidas"], a: 1 },
+        { q: "17. ¿Qué acción es la más recomendada si recibes un correo sospechoso de tu banco pidiendo verificar datos?", options: ["Responder con tus datos falsos para probar", "Hacer clic en el enlace para ver a dónde redirige", "Ignorarlo, cerrar el correo y entrar directamente al sitio oficial escribiendo la URL o desde su app", "Reenviarlo a todos tus contactos como advertencia"], a: 2 },
+        { q: "18. ¿Qué es el 'Zero-Day' (Día Cero)?", options: ["El primer día que compras una computadora nueva", "Una vulnerabilidad de software desconocida por el fabricante y sin parche de seguridad disponible", "El tiempo que tarda en expirar una contraseña", "Un tipo de respaldo de datos diario"], a: 1 },
+        { q: "19. ¿Qué es el 'Watering Hole Attack' (Ataque de abrevadero)?", options: ["Derramar líquidos sobre los servidores de una empresa", "Infectar sitios web legítimos que frecuenta un grupo objetivo específico para comprometerlos", "Un virus que se transmite por descargas de música", "Un ataque de denegación de servicio masivo"], a: 1 },
+        { q: "20. ¿Qué significa la regla de respaldo '3-2-1' en ciberseguridad?", options: ["3 intentos de contraseña, 2 bloqueos, 1 baneo definitivo", "3 copias de datos, en 2 soportes diferentes, con 1 copia guardada fuera del sitio (offsite)", "3 antivirus instalados, 2 actualizaciones semanales, 1 reinicio diario", "3 niveles de usuario, 2 contraseñas maestras, 1 respaldo en la nube"], a: 1 },
+        { q: "21. ¿Qué es el 'Cryptojacking'?", options: ["Robar criptomonedas directamente de una billetera física con violencia", "El uso oculto de los recursos de tu computadora o dispositivo por parte de terceros para minar criptomonedas", "Una estafa de inversión piramidal en criptomonedas", "Un método legal para comprar bitcoins sin comisiones"], a: 1 },
+        { q: "22. ¿Cuál es el riesgo de hacer clic en anuncios de buscadores que imitan páginas oficiales (Malvertising)?", options: ["Que aparezca publicidad molesta en el escritorio", "Que descargues software malicioso o caigas en una página de phishing idéntica a la real", "Que se desconfigure la resolución de tu pantalla", "Que tu navegador se bloquee permanentemente"], a: 1 },
+        { q: "23. ¿Qué es la Autenticación Multifactor (MFA)?", options: ["Usar la misma contraseña en múltiples plataformas", "Requerir dos o más métodos de verificación independientes (ej. contraseña + código de app)", "Tener varias cuentas de correo electrónico activas", "Cambiar de clave cada mes obligatoriamente"], a: 1 },
+        { q: "24. ¿Qué es el 'Scraping' de datos en redes sociales?", options: ["Borrar publicaciones antiguas automáticamente", "La extracción masiva automatizada de información y datos públicos de perfiles de usuarios por parte de bots", "Reportar cuentas falsas de forma masiva", "Bloquear seguidores indeseados"], a: 1 },
+        { q: "25. ¿Por qué es peligroso escanear códigos QR de fuentes desconocidas (Qrishing)?", options: ["Porque gastan los datos móviles muy rápido", "Porque pueden redirigir sigilosamente a sitios web maliciosos de phishing o descargas automáticas de malware", "Porque desconfiguran la cámara del celular", "Porque activan llamadas internacionales automáticas"], a: 1 }
+    ];
+
+    let indiceActual = 0;
+    const respuestas = {};
+
+    function renderPregunta() {
+        const container = document.getElementById('questionsContainer');
+        const pregunta = preguntas[indiceActual];
+
+        if (!pregunta) return;
+
+        const opcionesHtml = pregunta.options.map((opt, optIndex) => `
+            <label class="option-card ${respuestas[indiceActual] === optIndex ? 'selected' : ''}">
+                <input type="radio" name="p${indiceActual}" value="${optIndex}" ${respuestas[indiceActual] === optIndex ? 'checked' : ''}>
+                <span>${opt}</span>
+            </label>
+        `).join('');
+
+        const botonTexto = indiceActual === preguntas.length - 1 ? 'Evaluar mis conocimientos' : 'Siguiente';
+
+        container.innerHTML = `
+            <div class="question-box">
+                <div class="question-title">${pregunta.q}</div>
+                <div class="options">${opcionesHtml}</div>
+                <div class="quiz-nav">
+                    <button type="button" class="btn-next" id="btnSiguiente">${botonTexto}</button>
+                </div>
+            </div>
+        `;
+
+        document.querySelectorAll('input[name="p' + indiceActual + '"]').forEach(input => {
+            input.addEventListener('change', function() {
+                respuestas[indiceActual] = Number(this.value);
+                document.querySelectorAll('input[name="p' + indiceActual + '"]').forEach(radio => {
+                    const label = radio.closest('label');
+                    label.classList.toggle('selected', radio.checked);
+                });
+            });
+        });
+
+        document.getElementById('btnSiguiente').addEventListener('click', () => {
+            const seleccionada = document.querySelector(`input[name="p${indiceActual}"]:checked`);
+            if (!seleccionada) {
+                alert('Primero selecciona una respuesta para continuar.');
+                return;
+            }
+
+            const card = document.querySelector('.question-box');
+            card.classList.add('exit');
+
+            setTimeout(() => {
+                if (indiceActual < preguntas.length - 1) {
+                    indiceActual++;
+                    renderPregunta();
+                } else {
+                    calcularResultados();
+                }
+            }, 420);
+        });
+    }
+
+
+    async function guardarResultadoMaster(aciertos) {
+        if (!window.SAFEMIND_SUPABASE_CONFIGURED || !window.supabaseClient) return;
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) return;
+        const incorrectas = preguntas.length - aciertos;
+        const porcentaje = Math.round((aciertos / preguntas.length) * 10000) / 100;
+        const aprobado = aciertos >= 18;
+        const { error } = await window.supabaseClient.from("resultados_master").insert({
+            usuario_id: user.id,
+            correo: user.email || "Invitado",
+            correctas: aciertos,
+            incorrectas,
+            total_preguntas: preguntas.length,
+            porcentaje,
+            aprobado,
+            fecha: new Date().toISOString()
+        });
+        if (error) console.warn("Resultado Master no guardado:", error.message);
+    }
+
+    async function calcularResultados() {
+        let aciertos = 0;
+
+        preguntas.forEach((item, index) => {
+            if (respuestas[index] === item.a) {
+                aciertos++;
+            }
+        });
+
+        await guardarResultadoMaster(aciertos);
+
+        const resultContainer = document.getElementById('result-container');
+        const resultDiv = document.getElementById('result');
+        const diplomaBox = document.getElementById('diplomaBox');
+        
+        resultContainer.classList.remove('hidden');
+        
+        let mensaje = "";
+        if (aciertos >= 18) {
+            mensaje = `¡Felicitaciones! Obtuviste ${aciertos}/25. ¡Has aprobado el Modo Master y ganado tu certificación oficial! 🎉`;
+            resultDiv.style.color = "var(--success)";
+            
+            let nombreUsuario = prompt("¡Has aprobado! Ingresa tu nombre completo para emitir tu diploma:") || "Estudiante Master";
+            document.getElementById('userNameDisplay').innerText = nombreUsuario;
+            
+            const fechaHoy = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('diplomaDate').innerText = fechaHoy;
+
+            diplomaBox.classList.remove('hidden');
+        } else {
+            mensaje = `Obtuviste ${aciertos}/25. Necesitas al menos 18 aciertos para obtener el diploma. ¡Vuelve a intentarlo! ⚠️`;
+            resultDiv.style.color = "var(--warning)";
+            diplomaBox.classList.add('hidden');
+        }
+
+        resultDiv.innerHTML = mensaje;
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    renderPregunta();
+</script>
+
+<script src="click-spark.js"></script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SafeMind - Modo Kids</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+body{
+
+overflow-y:auto;
+
+}
+
+header{
+
+justify-content:flex-start;
+gap:60px;
+
+}
+
+header h2{
+
+font-size:38px;
+font-weight:800;
+
+}
+
+.btn-regresar{
+
+margin-left:auto;
+padding:12px 20px;
+border:2px solid #00d5ff;
+background:rgba(0, 213, 255, 0.12);
+color:#fff;
+border-radius:12px;
+font-size:15px;
+font-weight:700;
+cursor:pointer;
+transition:.25s;
+}
+
+.btn-regresar:hover{
+
+background:rgba(0, 213, 255, 0.2);
+transform:translateY(-2px);
+}
+
+.switch{
+
+margin-left:auto;
+
+}
+
+.modulos{
+
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:40px;
+
+padding:60px 80px;
+
+}
+
+.modulo{
+
+width:320px;
+
+border:2px solid #3a3ff6;
+border-radius:20px;
+
+padding:25px 25px;
+
+background:rgba(0,0,0,.25);
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.modulo:hover{
+
+transform:translateY(-6px);
+border-color:#00d5ff;
+box-shadow:0 0 25px #00d5ff;
+
+}
+
+.modulo h3{
+
+font-size:32px;
+font-weight:800;
+margin-bottom:12px;
+
+}
+
+.modulo p{
+
+font-size:16px;
+opacity:.85;
+
+}
+
+.modulo .dificultad{
+
+display:inline-block;
+margin-top:15px;
+
+font-size:13px;
+font-weight:700;
+letter-spacing:1px;
+
+padding:5px 14px;
+border-radius:20px;
+
+}
+
+.facil .dificultad{ background:#00c37a; color:white; }
+.medio .dificultad{ background:#f0a500; color:white; }
+.dificil .dificultad{ background:#ff4444; color:white; }
+
+.modulo.medio{ margin-top:0; }
+.modulo.dificil{ width:340px; }
+
+</style>
+
+<link rel="stylesheet" href="progress.css">
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<img src="logo.png">
+
+<div>
+
+<h1>Safe<span>Mind</span></h1>
+<p>CIBERSEGURIDAD EDUCATIVA</p>
+
+</div>
+
+</div>
+
+<h2>Modo Kids</h2>
+
+<button class="btn-regresar" onclick="location.href='index.html'">← Regresar</button>
+
+</header>
+
+<div class="linea"></div>
+<div class="sm-progress-panel">
+  <div class="sm-progress-head"><strong>Mi progreso Kids</strong><span id="kidsProgressText">0%</span></div>
+  <div class="sm-progress-track"><div class="sm-progress-fill" id="kidsProgressFill"></div></div>
+  <div class="sm-progress-count" id="kidsProgressCount">0 / 15 niveles completados</div>
+</div>
+
+
+<div class="modulos">
+
+<div class="modulo facil" data-modulo-real="1" onclick="if(this.dataset.locked!=='true') location.href='Modulo_1.html'">
+
+<h3>01</h3>
+<p>En esta parte aprenderemos sobre Como crear una contraseña segura.</p>
+<span class="dificultad">FÁCIL · 5 NIVELES</span>
+
+</div>
+
+<div class="modulo medio" data-modulo-real="2" onclick="if(this.dataset.locked!=='true') location.href='Modulo_2.html'">
+
+<h3>02</h3>
+<p>En esta parte aprenderemos sobre Como identificar chats trampas</p>
+<span class="dificultad">MEDIO · 5 NIVELES</span>
+
+</div>
+
+<div class="modulo dificil" data-modulo-real="3" onclick="if(this.dataset.locked!=='true') location.href='Modulo_3.html'">
+
+<h3>03</h3>
+<p>En esta parte aprenderemos sobre la Navegación segura en Internet</p>
+<span class="dificultad">DIFÍCIL · 5 NIVELES</span>
+
+</div>
+
+</div>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>SafeMindProgress.initKidsDashboard());</script>
+<script src="click-spark.js"></script>
+</body>
+</html>

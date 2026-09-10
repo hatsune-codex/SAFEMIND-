@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nivel 5: El Detective de la Ingeniería Social</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-deep: #0b0f19;
+            --surface-chat: #111827;
+            --surface-panel: #1f2937;
+            --accent-glow: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* CONTENEDOR APP PRINCIPAL */
+        .chat-app {
+            width: 100%;
+            max-width: 760px;
+            height: 88vh;
+            max-height: 780px;
+            background: var(--surface-chat);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* HUD SUPERIOR DE PRIVACIDAD */
+        .hud-header {
+            background: rgba(17, 24, 39, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 10;
+        }
+
+        .privacy-stats {
+            flex-grow: 1;
+            max-width: 280px;
+            margin-right: 20px;
+        }
+
+        .privacy-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .privacy-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .privacy-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--accent-green);
+            border-radius: 99px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease;
+        }
+
+        .btn-emergency {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-emergency:hover {
+            background: var(--accent-red);
+            color: white;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+        }
+
+        /* HEADER DEL PERFIL DE CHAT */
+        .chat-user-header {
+            background: var(--surface-panel);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .profile-avatar-box {
+            position: relative;
+            width: 44px;
+            height: 44px;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            border: 2px solid var(--surface-panel);
+        }
+
+        .profile-info h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .profile-info span {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* CUERPO DEL CHAT (MENSAJES) */
+        .chat-messages-area {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            scroll-behavior: smooth;
+        }
+
+        .msg-bubble {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: messagePop 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+
+        @keyframes messagePop {
+            0% { opacity: 0; transform: translateY(15px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .msg-bubble.npc { align-self: flex-start; }
+        .msg-bubble.player { align-self: flex-end; flex-direction: row-reverse; }
+
+        .bubble-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .bubble-content {
+            background: var(--surface-panel);
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .msg-bubble.player .bubble-content {
+            background: #2563eb;
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-bubble.npc .bubble-content {
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .msg-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 4px;
+            align-items: baseline;
+        }
+
+        .msg-author { font-weight: 600; font-size: 0.82rem; color: #fff; }
+        .msg-time { font-size: 0.7rem; color: var(--text-muted); }
+
+        /* TYPING INDICATOR */
+        .typing-box {
+            display: flex;
+            gap: 4px;
+            padding: 10px 14px;
+            background: var(--surface-panel);
+            border-radius: 14px;
+            align-self: flex-start;
+            align-items: center;
+            display: none;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounceDot 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounceDot {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        /* PANEL INFERIOR DE OPCIONES */
+        .chat-actions-footer {
+            background: var(--surface-panel);
+            padding: 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .choices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .choice-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            padding: 14px 18px;
+            border-radius: 14px;
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .choice-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--accent-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .choice-index {
+            background: rgba(255, 255, 255, 0.08);
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--accent-glow);
+            flex-shrink: 0;
+        }
+
+        /* NAVEGACIÓN INFERIOR */
+        .bottom-nav-links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .nav-anchor {
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-anchor:hover { color: #fff; }
+
+        /* MODAL DE RESULTADOS FLOTANTE */
+        .modal-wrapper {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-wrapper.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--surface-chat);
+            border: 1px solid var(--border-subtle);
+            padding: 36px;
+            border-radius: 24px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-wrapper.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-emoji { font-size: 3.5rem; margin-bottom: 16px; }
+        .modal-heading { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; }
+        .modal-paragraph { font-size: 0.92rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+
+        .modal-actions-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-action {
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .btn-action:hover { opacity: 0.9; }
+        .btn-primary-action { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .btn-secondary-action { background: var(--surface-panel); color: var(--text-main); border: 1px solid var(--border-subtle); }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .chat-app { height: 100vh; max-height: none; border-radius: 0; border: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-app">
+        <!-- HUD SUPERIOR -->
+        <div class="hud-header">
+            <div class="privacy-stats">
+                <div class="privacy-labels">
+                    <span>🛡️ Nivel de Privacidad</span>
+                    <span id="privacy-val">100%</span>
+                </div>
+                <div class="privacy-track">
+                    <div class="privacy-fill" id="privacy-bar"></div>
+                </div>
+            </div>
+            <div>
+                <button class="btn-emergency" onclick="executeReport()">🚨 BLOQUEAR Y REPORTAR</button>
+            </div>
+        </div>
+
+        <!-- HEADER DEL CONTACTO -->
+        <div class="chat-user-header">
+            <div class="profile-avatar-box">
+                <div class="avatar-img">A</div>
+                <div class="online-indicator"></div>
+            </div>
+            <div class="profile-info">
+                <h3>Alex_ProGamer99</h3>
+                <span>Cazatalentos / Jugador Desconocido</span>
+            </div>
+        </div>
+
+        <!-- ÁREA DE CHAT -->
+        <div class="chat-messages-area" id="chat-messages">
+            <!-- Indicador de escritura animado -->
+            <div class="typing-box" id="typing-box">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <!-- FOOTER DE OPCIONES -->
+        <div class="chat-actions-footer">
+            <div class="choices-list" id="choices-container">
+                <!-- Se generan dinámicamente -->
+            </div>
+            <div class="bottom-nav-links">
+                <a href="modo_kids.html" class="nav-anchor">⬅️ Regresar al Menú</a>
+                <a class="nav-anchor" onclick="resetGame()">🔄 Intentar de Nuevo</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE RESULTADOS -->
+    <div class="modal-wrapper" id="result-modal">
+        <div class="modal-card">
+            <div class="modal-emoji" id="modal-emoji">🏆</div>
+            <h2 class="modal-heading" id="modal-title">Título</h2>
+            <p class="modal-paragraph" id="modal-desc">Descripción...</p>
+            <div class="modal-actions-grid" id="modal-buttons">
+                <!-- Inyectado dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let privacy = 100;
+        let stage = 1;
+        let locked = false;
+
+        const scriptData = {
+            1: {
+                npc: "¡Hola bro! Vi tus jugadas en el torneo y juegas increíble 🤩. Soy reclutador de eSports y queremos darte un patrocinio de $500. ¿Te interesa?",
+                options: [
+                    { text: "¡Súper! Sí me interesa muchísimo, ¿qué hago?", type: "bad", cost: 10, reply: "¡Excelente mentalidad! sabía que querías crecer rápido en esto." },
+                    { text: "Hola. ¿De qué equipo eres y cuál es tu sitio web oficial?", type: "good", cost: 0, reply: "Eh... somos una organización nueva en expansión, aún no tenemos sitio web oficial." },
+                    { text: "No me interesa hablar con desconocidos sobre dinero.", type: "good", cost: 0, reply: "¿Hablas en serio? Estás perdiendo la oportunidad de tu vida, chico." }
+                ]
+            },
+            2: {
+                npc: "¡Genial! Para el contrato URGENTE necesito tu nombre completo, colegio/escuela y tu número de teléfono celular.",
+                options: [
+                    { text: "Claro, mi nombre es [Mi Nombre] y mi teléfono es...", type: "bad", cost: 50, reply: "Perfecto, datos anotados. Ya casi cerramos el acuerdo." },
+                    { text: "Es muy rápido... Prefiero que le envíes la propuesta a mi tutor o por correo oficial.", type: "good", cost: 0, reply: "¿Tutor? No me salgas con rodeos, el trato es directo conmigo o se cancela ahora." },
+                    { text: "¿Por qué necesitas saber mi colegio para un torneo de videojuegos?", type: "good", cost: 0, reply: "Es rutina de verificación interna... no hagas preguntas innecesarias y cumple." }
+                ]
+            },
+            3: {
+                npc: "Oye no seas desconfiado, si no me mandas foto de tu documento/carnet y tu dirección en 3 minutos le doy el dinero a otro.",
+                options: [
+                    { text: "Está bien, no quiero perder los $500, ya te lo mando.", type: "fatal", cost: 40, reply: "¡Listo! Documentos y dirección recibidos con éxito." },
+                    { text: "Esto es claramente Ingeniería Social. No te enviaré nada.", type: "good", cost: 0, reply: "¡Ey, espera! Estás cometiendo un grave error, perdedor." },
+                    { text: "Ningún torneo real presiona de esa manera. Voy a reportarte.", type: "good", cost: 0, reply: "Jaja, haz lo que quieras, de igual forma perdiste el dinero." }
+                ]
+            }
+        };
+
+        const chatBox = document.getElementById('chat-messages');
+        const typingBox = document.getElementById('typing-box');
+        const choicesContainer = document.getElementById('choices-container');
+        const privacyBar = document.getElementById('privacy-bar');
+        const privacyVal = document.getElementById('privacy-val');
+
+        function resetGame() {
+            privacy = 100;
+            stage = 1;
+            locked = false;
+            chatBox.innerHTML = '';
+            chatBox.appendChild(typingBox);
+            updatePrivacyUI();
+            closeModal();
+            
+            setTimeout(() => {
+                appendNPCMessage(scriptData[1].npc);
+                renderChoices(1);
+            }, 500);
+        }
+
+        function updatePrivacyUI() {
+            privacyVal.textContent = privacy + '%';
+            privacyBar.style.width = privacy + '%';
+
+            if (privacy > 60) privacyBar.style.background = 'var(--accent-green)';
+            else if (privacy > 30) privacyBar.style.background = 'var(--accent-yellow)';
+            else privacyBar.style.background = 'var(--accent-red)';
+        }
+
+        function appendNPCMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'msg-bubble npc';
+            div.innerHTML = `
+                <div class="bubble-avatar" style="background: #1e3a8a; color: #93c5fd;">A</div>
+                <div>
+                    <div class="msg-meta">
+                        <span class="msg-author">Alex_ProGamer99</span>
+                        <span class="msg-time">Hace un momento</span>
+                    </div>
+                    <div class="bubble-content">${text}</div>
+                </div>
+            `;
+            chatBox.insertBefore(div, typingBox);
+            scrollDown();
+        }
+
+        function appendPlayerMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'msg-bubble player';
+            div.innerHTML = `
+                <div class="bubble-avatar" style="background: #2563eb; color: #fff;">Tú</div>
+                <div>
+                    <div class="msg-meta" style="justify-content: flex-end;">
+                        <span class="msg-time">Hace un momento</span>
+                        <span class="msg-author">Tú</span>
+                    </div>
+                    <div class="bubble-content">${text}</div>
+                </div>
+            `;
+            chatBox.insertBefore(div, typingBox);
+            scrollDown();
+        }
+
+        function renderChoices(currentStage) {
+            choicesContainer.innerHTML = '';
+            if (locked) return;
+
+            const currentOptions = scriptData[currentStage].options;
+            currentOptions.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerHTML = `<span class="choice-index">${idx + 1}</span> ${opt.text}`;
+                btn.onclick = () => selectChoice(opt, currentStage);
+                choicesContainer.appendChild(btn);
+            });
+        }
+
+        function selectChoice(option, currentStage) {
+            if (locked) return;
+            locked = true;
+            choicesContainer.innerHTML = '';
+
+            appendPlayerMessage(option.text);
+
+            privacy -= option.cost;
+            if (privacy < 0) privacy = 0;
+            updatePrivacyUI();
+
+            if (privacy === 0) {
+                setTimeout(() => {
+                    appendNPCMessage(option.reply);
+                    setTimeout(() => triggerDefeat("❌ ¡Has sido víctima!", "Cediste datos críticos y caíste en las tácticas de manipulación y falsa urgencia del atacante."), 1200);
+                }, 800);
+                return;
+            }
+
+            showTyping();
+
+            setTimeout(() => {
+                hideTyping();
+                appendNPCMessage(option.reply);
+
+                if (currentStage < 3) {
+                    stage++;
+                    setTimeout(() => {
+                        showTyping();
+                        setTimeout(() => {
+                            hideTyping();
+                            appendNPCMessage(scriptData[stage].npc);
+                            locked = false;
+                            renderChoices(stage);
+                        }, 1200);
+                    }, 600);
+                } else {
+                    locked = false;
+                    choicesContainer.innerHTML = `<div style="text-align:center; font-size:0.85rem; color:var(--accent-yellow); padding:4px;">⚠️ Sospechoso detectado. Utiliza el botón superior para <b>BLOQUEAR Y REPORTAR</b>.</div>`;
+                }
+            }, 1400);
+        }
+
+        function executeReport() {
+            if (privacy < 30) {
+                triggerDefeat("⚠️ Reporte Tardío", "Intentaste reportar, pero ya habías compartido demasiada información personal antes de reaccionar.");
+            } else {
+                triggerVictory();
+            }
+        }
+
+        function triggerVictory() {
+            locked = true;
+            SafeMindProgress.complete(3, 5);
+            document.getElementById('modal-emoji').textContent = "🎉";
+            document.getElementById('modal-title').textContent = "¡Excelente Trabajo Detective!";
+            document.getElementById('modal-title').style.color = "var(--accent-green)";
+            document.getElementById('modal-desc').textContent = "Identificaste con éxito los halagos excesivos, la urgencia fingida y la solicitud ilícita de datos personales, bloqueando la amenaza a tiempo.";
+            
+            document.getElementById('modal-buttons').innerHTML = `
+                <a href="Modulo_3.html" class="btn-action btn-primary-action">🏆 Finalizar Módulo</a>
+                <button class="btn-action btn-secondary-action" onclick="resetGame()">🔄 Volver a Jugar</button>
+            `;
+            document.getElementById('result-modal').classList.add('active');
+        }
+
+        function triggerDefeat(title, desc) {
+            locked = true;
+            document.getElementById('modal-emoji').textContent = "❌";
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-title').style.color = "var(--accent-red)";
+            document.getElementById('modal-desc').textContent = desc;
+
+            document.getElementById('modal-buttons').innerHTML = `
+                <button class="btn-action btn-primary-action" onclick="resetGame()">🔄 Intentar de Nuevo</button>
+                <a href="Modulo_3.html" class="btn-action btn-secondary-action">⬅️ Regresar al Módulo</a>
+            `;
+            document.getElementById('result-modal').classList.add('active');
+        }
+
+        function showTyping() {
+            typingBox.style.display = 'flex';
+            scrollDown();
+        }
+
+        function hideTyping() {
+            typingBox.style.display = 'none';
+        }
+
+        function scrollDown() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.remove('active');
+        }
+
+        window.onload = resetGame;
+    </script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+
+<a href="Modulo_3.html" style="position:fixed;top:16px;left:16px;z-index:1000;padding:10px 14px;border:1px solid var(--cyan);background:rgba(2,2,4,.92);color:var(--cyan);font-weight:700;text-decoration:none;">&larr; REGRESAR</a>
+</html>

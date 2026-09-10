@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SafeMind - Nivel 1: El Candado y las Llaves</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+body{
+
+overflow-y:auto;
+
+}
+
+.volver{
+
+display:inline-flex;
+align-items:center;
+gap:10px;
+
+margin:20px 50px 0;
+
+color:#00d5ff;
+text-decoration:none;
+font-weight:600;
+font-size:18px;
+
+}
+
+.titulo{
+
+text-align:center;
+margin:20px 0 5px;
+
+}
+
+.titulo h2{
+
+font-size:32px;
+
+}
+
+.titulo p{
+
+opacity:.8;
+max-width:600px;
+margin:10px auto 0;
+
+}
+
+.escena{
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+gap:40px;
+
+padding:30px 30px 70px;
+
+}
+
+.zona-llave{
+
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:8px;
+
+}
+
+#llave{
+
+font-size:60px;
+color:#ffd43b;
+
+cursor:grab;
+
+filter:drop-shadow(0 0 15px rgba(255,212,59,.6));
+
+}
+
+#llave.oculta{
+
+visibility:hidden;
+
+}
+
+.zona-llave span{
+
+font-size:14px;
+opacity:.7;
+
+}
+
+#cofre{
+
+width:170px;
+height:170px;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:8px;
+
+border:3px dashed #3a3ff6;
+border-radius:20px;
+
+font-size:70px;
+
+color:#00d5ff;
+
+transition:.2s;
+
+}
+
+#cofre.sobre{
+
+border-color:#00ff99;
+background:rgba(0,255,153,.08);
+transform:scale(1.05);
+
+}
+
+#cofre span{
+
+font-size:13px;
+font-weight:600;
+opacity:.8;
+
+}
+
+.personajes{
+
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:25px;
+
+max-width:900px;
+
+}
+
+.personaje{
+
+width:190px;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+
+padding:20px 15px;
+
+border:3px solid #3a3ff6;
+border-radius:20px;
+
+background:rgba(0,0,0,.25);
+
+transition:.2s;
+
+}
+
+.personaje i{
+
+font-size:44px;
+color:#00d5ff;
+
+}
+
+.personaje p{
+
+font-size:15px;
+font-weight:600;
+text-align:center;
+
+}
+
+.personaje.sobre{
+
+transform:scale(1.06);
+
+}
+
+.personaje.correcto.sobre{
+
+border-color:#00ff99;
+box-shadow:0 0 25px rgba(0,255,153,.5);
+
+}
+
+.personaje.incorrecto.sobre{
+
+border-color:#ff4444;
+box-shadow:0 0 25px rgba(255,68,68,.5);
+
+}
+
+#mensaje{
+
+margin-top:10px;
+
+font-size:20px;
+font-weight:700;
+
+min-height:30px;
+
+text-align:center;
+
+}
+
+.pantallaFinal{
+
+display:none;
+
+flex-direction:column;
+align-items:center;
+gap:15px;
+
+margin-top:10px;
+
+}
+
+.pantallaFinal i{
+
+font-size:70px;
+color:#ffd43b;
+
+}
+
+.pantallaFinal h3{
+
+font-size:28px;
+
+}
+
+#siguienteNivel{
+
+margin-top:10px;
+
+padding:14px 30px;
+
+border:none;
+border-radius:14px;
+
+background:#14b8a6;
+color:white;
+
+font-size:18px;
+font-weight:700;
+
+cursor:pointer;
+
+}
+
+body.light .personaje,
+body.light #cofre{
+
+background:#ffffff;
+border-color:#6d5ce8;
+box-shadow:0 4px 15px rgba(0,0,0,.06);
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<img src="logo.png">
+
+<div>
+
+<h1>Safe<span>Mind</span></h1>
+<p>CIBERSEGURIDAD EDUCATIVA</p>
+
+</div>
+
+</div>
+
+</header>
+
+<div class="linea"></div>
+
+<a href="Modulo_1.html" class="volver">
+
+<i class="fa-solid fa-arrow-left"></i> Volver al módulo
+
+</a>
+
+<div class="titulo">
+
+<h2>Nivel 1: El Candado y las Llaves</h2>
+<p>Arrastra la llave hacia quién crees que SÍ puede tenerla. Ten cuidado, no todos son de confianza.</p>
+
+</div>
+
+<div class="escena">
+
+<div class="zona-llave">
+
+<i class="fa-solid fa-key" id="llave" draggable="true"></i>
+<span>Arrástrame</span>
+
+</div>
+
+<div id="cofre" data-correcto="true">
+
+<i class="fa-solid fa-lock"></i>
+<span>No se la doy a nadie</span>
+
+</div>
+
+<div class="personajes">
+
+<div class="personaje" data-correcto="false">
+
+<i class="fa-solid fa-user"></i>
+<p>Tu mejor amigo</p>
+
+</div>
+
+<div class="personaje" data-correcto="false">
+
+<i class="fa-solid fa-user-secret"></i>
+<p>Un desconocido</p>
+
+</div>
+
+<div class="personaje" data-correcto="true">
+
+<i class="fa-solid fa-user-shield"></i>
+<p>Tu mamá</p>
+
+</div>
+
+<div class="personaje" data-correcto="false">
+
+<i class="fa-solid fa-gamepad"></i>
+<p>Alguien que dice ser de Roblox</p>
+
+</div>
+
+</div>
+
+<p id="mensaje"></p>
+
+<div class="pantallaFinal" id="pantallaFinal">
+
+<i class="fa-solid fa-shield-heart"></i>
+<h3>¡Insignia desbloqueada!<br>Guardián de Contraseñas</h3>
+
+
+</div>
+
+</div>
+
+<script src="ejercicio1.js"></script>
+
+  <a href="modo_kids.html" class="btn-salir">Salir</a>
+  <style>
+    .btn-salir {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 9999;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff4d6d, #ff7b54);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(255, 77, 109, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-salir:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(255, 77, 109, 0.45);
+    }
+  </style>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

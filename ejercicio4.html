@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMind - Escudo LEGO de Contraseñas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: linear-gradient(135deg, #050612 0%, #0d0a20 50%, #1e114d 100%);
+            --text-main: #ffffff;
+            --text-muted: #a0a0c0;
+            --cyan: #00d2ff;
+            --purple: #3b28cc;
+            --card-bg: #110f24;
+            --card-border: #382c75;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s ease, color 0.3s ease; }
+
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-text h1 { font-size: 26px; font-weight: 800; }
+        .logo-text h1 span { color: var(--cyan); }
+        .logo-text p { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
+        
+        .separator { width: 100%; height: 1px; background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 100%); box-shadow: 0 0 8px var(--cyan); }
+
+        .container { padding: 20px 40px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .back-link { color: var(--cyan); text-decoration: none; font-weight: 600; font-size: 14px; margin-bottom: 20px; align-self: flex-start; }
+
+        .builder-card { width: 100%; max-width: 600px; background: var(--card-bg); border: 3px solid var(--card-border); border-radius: 24px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 18px; align-items: center; }
+
+        .builder-card h2 { font-size: 22px; text-align: center; font-weight: 900; background: linear-gradient(90deg, var(--cyan), #9c27b0); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-size: 13px; text-align: center; color: var(--text-muted); margin-top: -10px; font-weight: 500; }
+
+        /* ESCUDO 3D LEGO */
+        .lego-shield-container {
+            width: 140px; height: 140px; background: #555; border-radius: 18px; position: relative;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.4), 0 15px 25px rgba(0,0,0,0.5);
+            transition: background 0.4s ease, transform 0.3s ease;
+            border: 3px solid rgba(255,255,255,0.2);
+            margin: 10px 0;
+        }
+
+        .stud {
+            position: absolute; width: 28px; height: 28px; background: inherit; border-radius: 50%;
+            top: -14px; border: 3px solid rgba(255,255,255,0.2); filter: brightness(1.1);
+        }
+        .stud.top-left { left: 20px; }
+        .stud.top-right { right: 20px; }
+
+        .shield-core { text-align: center; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        #shield-icon { font-size: 40px; }
+        #shield-verdict { font-size: 11px; font-weight: 800; color: #fff; text-transform: uppercase; background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 6px; }
+
+        /* Pantalla donde se acumulan los bloques */
+        .password-screen {
+            width: 100%; background: rgba(0,0,0,0.4); border: 2px dashed var(--card-border); border-radius: 14px;
+            min-height: 70px; display: flex; align-items: center; padding: 10px 15px; gap: 8px; flex-wrap: wrap; overflow-x: auto;
+        }
+        .placeholder-text { color: var(--text-muted); font-size: 13px; font-style: italic; }
+
+        .lego-pill {
+            background: #ff5722; color: #fff; padding: 6px 12px; border-radius: 8px; font-weight: 800;
+            font-size: 13px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 0 #b23c17;
+        }
+        .lego-pill span { cursor: pointer; background: rgba(0,0,0,0.2); padding: 0 5px; border-radius: 50%; font-size: 11px; }
+        .lego-pill span:hover { background: #d32f2f; }
+
+        /* Secciones de bloques */
+        .lego-sections { width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .lego-category h3 { font-size: 12px; margin-bottom: 6px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+        .blocks-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .lego-brick {
+            padding: 8px 14px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 13px;
+            border: none; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4); transition: transform 0.1s ease, filter 0.2s ease;
+        }
+        .lego-brick.red { background: #e53935; box-shadow: 0 4px 0 #b71c1c; }
+        .lego-brick.blue { background: #1e88e5; box-shadow: 0 4px 0 #0d47a1; }
+        .lego-brick.yellow { background: #fbc02d; color: #212121; text-shadow: none; box-shadow: 0 4px 0 #f57f17; }
+        .lego-brick.green { background: #43a047; box-shadow: 0 4px 0 #1b5e20; }
+        .lego-brick:hover { filter: brightness(1.15); transform: translateY(-2px); }
+        .lego-brick:active { transform: translateY(2px); box-shadow: 0 2px 0 currentColor; }
+
+        /* Acciones */
+        .actions-row { width: 100%; display: flex; gap: 12px; }
+        .action-btn { flex: 1; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; text-align: center; border: none; font-size: 14px; }
+        .clear-btn { background: transparent; border: 2px solid var(--text-muted); color: var(--text-muted); }
+        .clear-btn:hover { border-color: #ff5252; color: #ff5252; }
+        .test-btn { background: linear-gradient(90deg, #00d2ff, #3a7bd5); color: #fff; box-shadow: 0 4px 12px rgba(0,210,255,0.4); }
+        .test-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; background: #555; }
+
+        /* Pantalla de resultado emergente (Enunciado visual) */
+        .result-banner {
+            width: 100%; padding: 12px; border-radius: 10px; font-weight: 800; text-align: center; font-size: 14px; display: none; animation: popIn 0.3s ease;
+        }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo-container">
+            <div class="logo-text">
+                <h1>Safe<span>Mind</span></h1>
+                <p>CIBERSEGURIDAD EDUCATIVA</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="separator"></div>
+
+    <div class="container">
+        <a href="Modulo_1.html" class="back-link">← Volver al módulo</a>
+
+        <main class="builder-card">
+            <h2>Forja tu Escudo LEGO</h2>
+            <p class="subtitle">Ensambla los bloques y evalúa el resultado de tu contraseña.</p>
+
+            <!-- Escudo 3D Central -->
+            <div class="lego-shield-container" id="lego-shield">
+                <div class="stud top-left"></div>
+                <div class="stud top-right"></div>
+                <div class="shield-core">
+                    <span id="shield-icon">🛡️</span>
+                    <div id="shield-verdict">¡Vacío!</div>
+                </div>
+            </div>
+
+            <!-- Banner de mensaje dinámico en pantalla -->
+            <div id="result-banner" class="result-banner"></div>
+
+            <!-- Pantalla de Contraseña -->
+            <div class="password-screen" id="password-screen">
+                <span class="placeholder-text">Toca los bloques de abajo...</span>
+            </div>
+
+            <!-- Secciones de Bloques -->
+            <div class="lego-sections">
+                <div class="lego-category">
+                    <h3>🔤 Letras</h3>
+                    <div class="blocks-grid">
+                        <button class="lego-brick red" data-val="AbC">AbC</button>
+                        <button class="lego-brick red" data-val="XyZ">XyZ</button>
+                        <button class="lego-brick red" data-val="T1gr3">T1gr3</button>
+                    </div>
+                </div>
+                <div class="lego-category">
+                    <h3>🔢 Números</h3>
+                    <div class="blocks-grid">
+                        <button class="lego-brick blue" data-val="2026">2026</button>
+                        <button class="lego-brick blue" data-val="99">99</button>
+                        <button class="lego-brick blue" data-val="7">7</button>
+                    </div>
+                </div>
+                <div class="lego-category">
+                    <h3>⚡ Símbolos</h3>
+                    <div class="blocks-grid">
+                        <button class="lego-brick yellow" data-val="#">#</button>
+                        <button class="lego-brick yellow" data-val="$">$</button>
+                        <button class="lego-brick yellow" data-val="!">!</button>
+                    </div>
+                </div>
+                <div class="lego-category">
+                    <h3>🎨 Emojis</h3>
+                    <div class="blocks-grid">
+                        <button class="lego-brick green" data-val="🔥">🔥</button>
+                        <button class="lego-brick green" data-val="🧊">🧊</button>
+                        <button class="lego-brick green" data-val="🚀">🚀</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="actions-row">
+                <button class="action-btn clear-btn" id="clear-btn">🧹 Reiniciar</button>
+                <button class="action-btn test-btn" id="test-btn" disabled>🚀 Evaluar Escudo</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.remove('light-mode');
+
+            const passwordScreen = document.getElementById('password-screen');
+            const legoShield = document.getElementById('lego-shield');
+            const shieldIcon = document.getElementById('shield-icon');
+            const shieldVerdict = document.getElementById('shield-verdict');
+            const clearBtn = document.getElementById('clear-btn');
+            const testBtn = document.getElementById('test-btn');
+            const legoBricks = document.querySelectorAll('.lego-brick');
+            const resultBanner = document.getElementById('result-banner');
+
+            let passwordBlocks = [];
+
+            legoBricks.forEach(brick => {
+                brick.addEventListener('click', () => {
+                    const val = brick.getAttribute('data-val');
+                    passwordBlocks.push(val);
+                    updateDisplay();
+                });
+            });
+
+            function updateDisplay() {
+                passwordScreen.innerHTML = '';
+                resultBanner.style.display = 'none';
+
+                if (passwordBlocks.length === 0) {
+                    const placeholder = document.createElement('span');
+                    placeholder.className = 'placeholder-text';
+                    placeholder.textContent = 'Toca los bloques de abajo...';
+                    passwordScreen.appendChild(placeholder);
+                    testBtn.disabled = true;
+                    setShieldAppearance("empty");
+                } else {
+                    passwordBlocks.forEach((text, index) => {
+                        const pill = document.createElement('div');
+                        pill.className = 'lego-pill';
+                        pill.innerHTML = `${text} <span data-index="${index}">×</span>`;
+                        pill.querySelector('span').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            passwordBlocks.splice(index, 1);
+                            updateDisplay();
+                        });
+                        passwordScreen.appendChild(pill);
+                    });
+                    testBtn.disabled = false;
+                    setShieldAppearance("building");
+                }
+            }
+
+            function setShieldAppearance(state) {
+                if (state === "empty") {
+                    legoShield.style.background = "#555";
+                    shieldIcon.textContent = "🛡️";
+                    shieldVerdict.textContent = "¡Vacío!";
+                } else if (state === "building") {
+                    legoShield.style.background = "#3f51b5";
+                    shieldIcon.textContent = "🧱";
+                    shieldVerdict.textContent = "Armando...";
+                } else if (state === "bad") {
+                    legoShield.style.background = "#e53935";
+                    shieldIcon.textContent = "💥";
+                    shieldVerdict.textContent = "¡Débil!";
+                } else if (state === "good") {
+                    legoShield.style.background = "#fbc02d";
+                    shieldIcon.textContent = "⚠️";
+                    shieldVerdict.textContent = "¡Regular!";
+                } else if (state === "perfect") {
+                    legoShield.style.background = "#43a047";
+                    shieldIcon.textContent = "🌟";
+                    shieldVerdict.textContent = "¡Blindado!";
+                }
+            }
+
+            clearBtn.addEventListener('click', () => {
+                passwordBlocks = [];
+                updateDisplay();
+            });
+
+            testBtn.addEventListener('click', () => {
+                const fullString = passwordBlocks.join('');
+                const length = fullString.length;
+
+                let score = 0;
+                if (length >= 8) score += 40;
+                if (/[0-9]/.test(fullString)) score += 20;
+                if (/[#$!_@*]/.test(fullString)) score += 20;
+                if (/[🔥🧊🚀]/.test(fullString)) score += 20;
+
+                resultBanner.style.display = 'block';
+
+                if (score < 40) {
+                    setShieldAppearance("bad");
+                    resultBanner.style.background = "rgba(229, 57, 53, 0.2)";
+                    resultBanner.style.color = "#ff5252";
+                    resultBanner.style.border = "2px solid #e53935";
+                    resultBanner.textContent = `💥 ¡Cuidado! "${fullString}" es muy corta o simple. ¡Los hackers la romperán en segundos!`;
+                } else if (score < 80) {
+                    setShieldAppearance("good");
+                    resultBanner.style.background = "rgba(251, 192, 45, 0.2)";
+                    resultBanner.style.color = "#ffb300";
+                    resultBanner.style.border = "2px solid #fbc02d";
+                    resultBanner.textContent = `⚠️ ¡Vas por buen camino! "${fullString}" es decente, pero le faltan más piezas para ser perfecta.`;
+                } else {
+                    setShieldAppearance("perfect");
+                    resultBanner.style.background = "rgba(67, 160, 71, 0.2)";
+                    resultBanner.style.color = "#4caf50";
+                    resultBanner.style.border = "2px solid #43a047";
+                    resultBanner.textContent = `🌟 ¡INCREÍBLE! Tu escudo LEGO "${fullString}" es totalmente indestructible. ¡Ningún hacker podrá con esto!`;
+                }
+            });
+        });
+    </script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

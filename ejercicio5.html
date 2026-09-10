@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMind - Jefe Final: Núcleo Ransomware</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="ejercicio5.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo-container">
+            <div class="logo-text">
+                <h1>Safe<span>Mind</span></h1>
+                <p>JEFE FINAL: NÚCLEO RANSOMWARE</p>
+            </div>
+        </div>
+        <div class="stats-box">
+            <div class="stat-item">Fase: <span id="boss-phase">1</span></div>
+            <div class="stat-item">Puntuación: <span id="score">0</span></div>
+        </div>
+    </header>
+
+    <div class="separator"></div>
+
+    <div class="container">
+        <main class="game-card" id="game-card">
+            <!-- Barras de Estado en Vivo -->
+            <div class="hud">
+                <div class="hud-bar-container">
+                    <span class="hud-label">🛡️ Blindaje Nave</span>
+                    <div class="bar-bg"><div class="bar-fill player-hp" id="player-hp-bar" style="width: 100%;"></div></div>
+                </div>
+                <div class="hud-bar-container">
+                    <span class="hud-label">🦠 Núcleo Ransomware</span>
+                    <div class="bar-bg"><div class="bar-fill boss-hp" id="boss-hp-bar" style="width: 100%;"></div></div>
+                </div>
+            </div>
+
+            <!-- Lienzo del Juego -->
+            <div class="canvas-wrapper" id="canvas-wrapper">
+                <canvas id="gameCanvas" width="550" height="500"></canvas>
+                <div class="start-screen" id="start-screen">
+                    <h3>⚠️ ALERTA DE AMENAZA CRÍTICA</h3>
+                    <p>Usa las flechas <strong>IZQUIERDA / DERECHA</strong> para moverte y <strong>ESPACIO</strong> para disparar fuego de depuración.</p>
+                    <button class="action-btn start-btn" id="start-btn">⚡ INICIAR COMBATE</button>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <button class="action-btn restart-btn" id="restart-btn" style="display: none;">🔄 Reiniciar Combate</button>
+                <a class="action-btn module-btn" id="module-btn" href="Modulo_2.html" style="display: none;">↩ Ir a Módulo 2</a>
+            </div>
+        </main>
+    </div>
+
+    <script src="ejercicio5.js"></script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>

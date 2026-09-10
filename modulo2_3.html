@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeMind - Cyber Runner</title>
+  <style>
+    :root[data-theme="dark"] {
+      --bg-primary: #050811;
+      --bg-card: #0b1120;
+      --bg-box: #111a2e;
+      --color-cyan: #00f0ff;
+      --color-blue: #0075ff;
+      --color-green: #00ff66;
+      --color-red: #ff0055;
+      --color-yellow: #ffcc00;
+      --color-text: #ffffff;
+      --color-sub: #64748b;
+      --border-cyan: rgba(0, 240, 255, 0.4);
+      --border-sub: #1e293b;
+      --canvas-bg: #080d1a;
+      --shadow: rgba(0, 0, 0, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.25s, color 0.25s, border-color 0.25s;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* NAVBAR SAFEMIND */
+    .navbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 48px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-sub);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Estilo actualizado para la imagen del logo */
+    .brand-logo {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-text h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--color-text);
+      line-height: 1;
+    }
+
+    .brand-text h1 span { color: var(--color-cyan); }
+
+    .brand-text p {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--color-sub);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Botón hacia Modulo_2 */
+    .btn-module {
+      background: transparent;
+      border: 1px solid var(--color-cyan);
+      color: var(--color-cyan);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-module:hover {
+      background: var(--color-cyan);
+      color: #000;
+      box-shadow: 0 0 12px var(--border-cyan);
+    }
+
+    /* LAYOUT PRINCIPAL */
+    .main-wrapper {
+      width: 100%;
+      max-width: 900px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .game-card {
+      width: 100%;
+      background: var(--bg-card);
+      border: 2px solid var(--border-cyan);
+      border-radius: 24px;
+      box-shadow: 0 16px 50px var(--shadow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    /* HUD DE ESTADO */
+    .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background: var(--bg-box);
+      border: 1px solid var(--border-sub);
+      border-radius: 16px;
+      padding: 12px 20px;
+      text-align: center;
+    }
+
+    .hud-label {
+      font-size: 11px;
+      color: var(--color-sub);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .hud-val {
+      font-size: 20px;
+      color: var(--color-cyan);
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    canvas {
+      background: var(--canvas-bg);
+      border: 1px solid var(--border-sub);
+      border-radius: 16px;
+      width: 100%;
+      height: 320px;
+      cursor: pointer;
+    }
+
+    /* OVERLAY INICIO / FINAL */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-card);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 32px;
+      text-align: center;
+      z-index: 10;
+      gap: 12px;
+    }
+
+    .overlay h2 {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--color-cyan);
+    }
+
+    .overlay p {
+      font-size: 14px;
+      color: var(--color-sub);
+      max-width: 500px;
+      line-height: 1.5;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, var(--color-blue), var(--color-cyan));
+      border: none;
+      color: #fff;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--border-cyan);
+      transition: transform 0.2s;
+    }
+
+    .btn-secondary {
+      background: var(--bg-box);
+      border: 1px solid var(--border-sub);
+      color: var(--color-text);
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 20px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+
+    .btn-start:hover, .btn-secondary:hover { transform: scale(1.03); }
+
+    /* MODAL PREGUNTA SEGURIDAD */
+    .question-modal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      max-width: 90%;
+      background: var(--bg-box);
+      border: 2px solid var(--color-cyan);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 0 40px var(--shadow);
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 15;
+    }
+
+    .q-title {
+      color: var(--color-cyan);
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .q-text {
+      font-size: 14px;
+      color: var(--color-text);
+      line-height: 1.4;
+    }
+
+    .q-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-opt {
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-sub);
+      border-radius: 10px;
+      color: var(--color-text);
+      font-size: 13px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .btn-opt:hover {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: var(--color-cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="brand">
+      <!-- Reemplazado la caja con emoji por la imagen logo.png -->
+      <img src="logo.png" alt="SafeMind Logo" class="brand-logo">
+      <div class="brand-text">
+        <h1>Safe<span>Mind</span></h1>
+        <p>CIBERSEGURIDAD EDUCATIVA</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <!-- Enlace al Módulo 2 -->
+      <a href="Modulo_2.html" class="btn-module">Ir a Módulo 2 ➔</a>
+    </div>
+  </nav>
+
+  <div class="main-wrapper">
+    <div class="game-card">
+      
+      <div class="hud-grid">
+        <div>
+          <div class="hud-label">PUNTUACIÓN</div>
+          <div class="hud-val" id="scoreVal">0</div>
+        </div>
+        <div>
+          <div class="hud-label">ESCUDOS</div>
+          <div class="hud-val" id="shieldsVal" style="color: var(--color-green);">3</div>
+        </div>
+        <div>
+          <div class="hud-label">DATOS RECOGIDOS</div>
+          <div class="hud-val" id="dataVal" style="color: var(--color-yellow);">0 / 5</div>
+        </div>
+      </div>
+
+      <canvas id="runnerCanvas" width="850" height="320"></canvas>
+
+      <div class="question-modal" id="qModal">
+        <div class="q-title">🔒 VERIFICACIÓN DE SEGURIDAD EN RUTA</div>
+        <div class="q-text" id="qText">Cargando...</div>
+        <div class="q-options" id="qOpts"></div>
+      </div>
+
+      <div class="overlay" id="overlay">
+        <h2 id="ovTitle">Cyber Runner 2026</h2>
+        <p id="ovDesc">
+          Presiona la <b>BARRA ESPACIADORA</b> o haz <b>CLIC EN PANTALLA</b> para saltar.<br>
+          Esquiva los <b>Láseres de Malware</b> (rojos) y atrapa los <b>Nodos de Datos</b> (azules) para resolver retos de ciberseguridad.
+        </p>
+        <div class="button-group">
+          <button class="btn-start" onclick="startGame()">CORRER EN LA RED</button>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    document.documentElement.setAttribute("data-theme", "dark");
+
+    const canvas = document.getElementById("runnerCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const questions = [
+      {
+        q: "Te llega un SMS sobre un paquete retenido pidiendo abrir un enlace raro. ¿Qué haces?",
+        opts: ["Hacer clic rápido", "Ignorar y borrar", "Reenviar a todos mis contactos"],
+        ans: 1
+      },
+      {
+        q: "Un juego te pide activar permisos de Cámara y Micrófono sin razón. ¿Qué haces?",
+        opts: ["Aceptar todo", "Denegar los permisos innecesarios", "Instalar de todos modos"],
+        ans: 1
+      },
+      {
+        q: "¿Qué es la Autenticación de Dos Factores (2FA)?",
+        opts: ["Usar la misma clave dos veces", "Un segundo paso de verificación para proteger tu cuenta", "Tener dos cuentas activas"],
+        ans: 1
+      }
+    ];
+
+    let player = { x: 80, y: 220, w: 30, h: 40, vy: 0, gravity: 0.7, jump: -12, isGrounded: false };
+    let obstacles = [];
+    let dataNodes = [];
+    let score = 0;
+    let shields = 3;
+    let dataCollected = 0;
+    let gameSpeed = 5;
+    let gameInterval = null;
+    let spawnTimer = 0;
+    let isPaused = false;
+
+    // Escuchar controles
+    window.addEventListener("keydown", e => {
+      if (e.code === "Space") jumpPlayer();
+    });
+    canvas.addEventListener("click", jumpPlayer);
+
+    function jumpPlayer() {
+      if (player.isGrounded && !isPaused) {
+        player.vy = player.jump;
+        player.isGrounded = false;
+      }
+    }
+
+    function startGame() {
+      document.getElementById("overlay").style.display = "none";
+      player.y = 220;
+      player.vy = 0;
+      obstacles = [];
+      dataNodes = [];
+      score = 0;
+      shields = 3;
+      dataCollected = 0;
+      gameSpeed = 5;
+      isPaused = false;
+
+      updateHUD();
+
+      clearInterval(gameInterval);
+      gameInterval = setInterval(gameLoop, 1000 / 60);
+    }
+
+    function gameLoop() {
+      if (isPaused) return;
+
+      // Actualizar Jugador
+      player.vy += player.gravity;
+      player.y += player.vy;
+
+      if (player.y >= 220) {
+        player.y = 220;
+        player.vy = 0;
+        player.isGrounded = true;
+      }
+
+      // Spawns
+      spawnTimer++;
+      if (spawnTimer % 90 === 0) {
+        obstacles.push({ x: canvas.width, w: 20, h: 40 + Math.random() * 20 });
+      }
+      if (spawnTimer % 210 === 0 && dataCollected < 5) {
+        dataNodes.push({ x: canvas.width, y: 150 - Math.random() * 40, size: 16 });
+      }
+
+      // Mover Obstáculos (Malware)
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        let obs = obstacles[i];
+        obs.x -= gameSpeed;
+
+        // Colisión con obstáculos
+        if (
+          player.x < obs.x + obs.w &&
+          player.x + player.w > obs.x &&
+          player.y < 260 &&
+          player.y + player.h > 260 - obs.h
+        ) {
+          shields--;
+          obstacles.splice(i, 1);
+          updateHUD();
+          if (shields <= 0) endGame(false, "🚨 ¡EL MALWARE INFILTRÓ TU SISTEMA!");
+          continue;
+        }
+
+        if (obs.x + obs.w < 0) obstacles.splice(i, 1);
+      }
+
+      // Mover Nodos de Datos
+      for (let i = dataNodes.length - 1; i >= 0; i--) {
+        let node = dataNodes[i];
+        node.x -= gameSpeed;
+
+        // Colisión con Nodos
+        if (
+          player.x < node.x + node.size &&
+          player.x + player.w > node.x &&
+          player.y < node.y + node.size &&
+          player.y + player.h > node.y
+        ) {
+          dataNodes.splice(i, 1);
+          triggerQuestion();
+          continue;
+        }
+
+        if (node.x + node.size < 0) dataNodes.splice(i, 1);
+      }
+
+      score += 1;
+      updateHUD();
+      draw();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const isThemeDark = document.documentElement.getAttribute("data-theme") === "dark";
+
+      // Suelo
+      ctx.strokeStyle = "#00f0ff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 260);
+      ctx.lineTo(canvas.width, 260);
+      ctx.stroke();
+
+      // Jugador
+      ctx.fillStyle = "#ffcc00";
+      ctx.fillRect(player.x, player.y, player.w, player.h);
+
+      // Obstáculos (Láseres rojas)
+      ctx.fillStyle = "#ff0055";
+      obstacles.forEach(obs => {
+        ctx.fillRect(obs.x, 260 - obs.h, obs.w, obs.h);
+      });
+
+      // Nodos de datos (Azules)
+      ctx.fillStyle = "#00f0ff";
+      dataNodes.forEach(node => {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function triggerQuestion() {
+      isPaused = true;
+      const modal = document.getElementById("qModal");
+      const qText = document.getElementById("qText");
+      const qOpts = document.getElementById("qOpts");
+
+      const qData = questions[dataCollected % questions.length];
+      qText.textContent = qData.q;
+      qOpts.innerHTML = "";
+
+      qData.opts.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "btn-opt";
+        btn.textContent = `${idx + 1}. ${opt}`;
+        btn.onclick = () => handleAnswer(idx === qData.ans);
+        qOpts.appendChild(btn);
+      });
+
+      modal.style.display = "flex";
+    }
+
+    function handleAnswer(isCorrect) {
+      document.getElementById("qModal").style.display = "none";
+      isPaused = false;
+
+      if (isCorrect) {
+        dataCollected++;
+        score += 200;
+        if (dataCollected >= 5) endGame(true, "🛡️ ¡RED PURIFICADA! Recogiste toda la información de seguridad.");
+      } else {
+        shields--;
+        if (shields <= 0) endGame(false, "⚠️ RESPUESTA INCORRECTA: Vulnerabilidad detectada.");
+      }
+      updateHUD();
+    }
+
+    function updateHUD() {
+      document.getElementById("scoreVal").textContent = score;
+      document.getElementById("shieldsVal").textContent = shields;
+      document.getElementById("dataVal").textContent = `${dataCollected} / 5`;
+    }
+
+    function endGame(won, msg) {
+      clearInterval(gameInterval);
+      if (won) SafeMindProgress.complete(2, 3);
+
+      const overlay = document.getElementById("overlay");
+      document.getElementById("ovTitle").textContent = won ? "🏆 ¡VICTORIA RUNNER!" : "💥 FIN DEL JUEGO";
+      document.getElementById("ovDesc").textContent = msg;
+      overlay.style.display = "flex";
+    }
+  </script>
+<script src="click-spark.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="progreso.js"></script>
+</body>
+</html>
